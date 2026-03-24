@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý người dùng - MyMusic{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">👥 Quản lý người dùng</h1>
+    <a href="/admin/dashboard" class="back-btn" style="text-decoration: none;">
+        <span>←</span> Quay lại Dashboard
+    </a>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}">{% if category == 'success' %}✅{% elif category == 'danger' %}❌{% else %}⚠️{% endif %} {{ message }}</div>
+    {% endfor %}
+{% endwith %}
+
+<div class="admin-table-container">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên đăng nhập</th>
+                <th>Email</th>
+                <th>Họ tên</th>
+                <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th>Ngày tạo</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td><strong>{{ user.username }}</strong></td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.full_name or '-' }}</td>
+                <td>
+                    <select class="role-select" data-user-id="{{ user.id }}" onchange="changeRole(this)">
+                        <option value="1" {% if user.role_id == 1 %}selected{% endif %}>👑 Admin</option>
+                        <option value="3" {% if user.role_id == 3 %}selected{% endif %}>✏️ Editor</option>
+                        <option value="2" {% if user.role_id == 2 %}selected{% endif %}>🎵 User</option>
+                    </select>
+                </td>
+                <td>
+                    <span class="status-badge {% if user.is_active %}status-active{% else %}status-inactive{% endif %}">
+                        {% if user.is_active %}● Hoạt động{% else %}○ Đã khóa{% endif %}
+                    </span>
+                </td>
+                <td>{{ user.created_at.strftime('%d/%m/%Y') if user.created_at else '-' }}</td>
+                <td>
+                    <button class="action-btn toggle-btn {% if not user.is_active %}inactive{% endif %}" 
+                            onclick="toggleUser({{ user.id }}, {{ 'false' if user.is_active else 'true' }})">
+                        {% if user.is_active %}🔒 Khóa{% else %}🔓 Mở khóa{% endif %}
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    <div class="page-btn" onclick="changePage({{ page-1 }})" {% if page <= 1 %}style="opacity:0.3;pointer-events:none;"{% endif %}>←</div>
+    {% for p in range(1, total_pages + 1) %}
+        <div class="page-btn {% if p == page %}active{% endif %}" onclick="changePage({{ p }})">{{ p }}</div>
+    {% endfor %}
+    <div class="page-btn" onclick="changePage({{ page+1 }})" {% if page >= total_pages %}style="opacity:0.3;pointer-events:none;"{% endif %}>→</div>
+</div>
+{% endif %}
+
+<style>
+.admin-table-container {
+    background: rgba(20, 20, 30, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 20px;
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th {
+    text-align: left;
+    padding: 12px 15px;
+    color: #d0d0ff;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.admin-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.admin-table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.role-select {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 6px 12px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+.role-select:focus {
+    outline: none;
+    border-color: #6e45ff;
+}
+
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    display: inline-block;
+}
+
+.status-active {
+    background: rgba(78, 205, 196, 0.2);
+    color: #4ecdc4;
+}
+
+.status-inactive {
+    background: rgba(255, 107, 107, 0.2);
+    color: #ff6b6b;
+}
+
+.action-btn {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+}
+
+.toggle-btn {
+    background: rgba(78, 205, 196, 0.2);
+    color: #4ecdc4;
+    border: 1px solid rgba(78, 205, 196, 0.3);
+}
+
+.toggle-btn.inactive {
+    background: rgba(255, 107, 107, 0.2);
+    color: #ff6b6b;
+    border-color: rgba(255, 107, 107, 0.3);
+}
+
+.toggle-btn:hover {
+    transform: scale(1.02);
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #8a8a9e;
+    transition: color 0.3s;
+}
+
+.back-btn:hover {
+    color: #6e45ff;
+}
+</style>
+
+<script>
+function changePage(page) {
+    window.location.href = `/admin/users?page=${page}`;
+}
+
+async function changeRole(select) {
+    const userId = select.dataset.userId;
+    const roleId = select.value;
+    
+    try {
+        const response = await fetch(`/admin/users/${userId}/role`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ role_id: parseInt(roleId) })
+        });
+        const data = await response.json();
+        if (data.success) {
+            showMessage('✅ ' + data.message, 'success');
+        } else {
+            showMessage('❌ Lỗi: ' + data.message, 'danger');
+            // Reset select về giá trị cũ
+            location.reload();
+        }
+    } catch (error) {
+        showMessage('❌ Có lỗi xảy ra', 'danger');
+        location.reload();
+    }
+}
+
+async function toggleUser(userId, activate) {
+    try {
+        const response = await fetch(`/admin/users/${userId}/toggle`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ is_active: activate })
+        });
+        const data = await response.json();
+        if (data.success) {
+            showMessage('✅ ' + data.message, 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showMessage('❌ Lỗi: ' + data.message, 'danger');
+        }
+    } catch (error) {
+        showMessage('❌ Có lỗi xảy ra', 'danger');
+    }
+}
+
+function showMessage(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.innerHTML = message;
+    document.querySelector('.page-header').after(alertDiv);
+    setTimeout(() => alertDiv.remove(), 3000);
+}
+</script>
+{% endblock %}

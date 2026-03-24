@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Chỉnh sửa thông tin - MyMusic{% endblock %}
+
+{% block content %}
+<div class="back-btn" onclick="window.location.href='/auth/profile'">
+    <span>←</span> Quay lại trang cá nhân
+</div>
+
+<div class="form-container" style="max-width: 600px;">
+    <h1 class="form-title">✏️ Chỉnh sửa thông tin</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{% if category == 'success' %}✅{% elif category == 'danger' %}❌{% else %}⚠️{% endif %} {{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="/auth/profile/edit">
+        <div class="form-group">
+            <label class="form-label">Họ và tên</label>
+            <input type="text" name="full_name" class="form-control" value="{{ user.full_name or '' }}">
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Email *</label>
+            <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">💾 Lưu thay đổi</button>
+            <a href="/auth/profile" class="btn-cancel" style="text-align: center; text-decoration: none;">❌ Hủy</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
