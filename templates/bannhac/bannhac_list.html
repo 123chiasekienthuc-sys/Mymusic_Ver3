@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Danh sách bản nhạc - MyMusic{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">🎵 Danh sách bản nhạc</h1>
+    <a href="/bannhac/add" class="add-btn"><span>➕</span> Thêm bản nhạc</a>
+</div>
+
+<div class="filter-bar">
+    <div class="filter-tabs">
+        <div class="filter-tab active" data-filter="all">Tất cả</div>
+        <div class="filter-tab" data-filter="newest">Mới nhất</div>
+        <div class="filter-tab" data-filter="popular">Phổ biến</div>
+    </div>
+    <select class="filter-select" id="composerFilter">
+        <option value="">Tất cả nhạc sĩ</option>
+        {% for ns in nhacsi_list %}
+        <option value="{{ ns.idnhacsi }}" {% if nhacsi_id == ns.idnhacsi %}selected{% endif %}>{{ ns.tennhacsi }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="songs-grid">
+    {% for song in bannhac_list %}
+    <div class="song-card" onclick="window.location.href='/bannhac/{{ song.idbannhac }}'">
+        <div class="song-icon">🎵</div>
+        <h3 class="song-title">{{ song.tenbannhac }}</h3>
+        <div class="song-composer">🎼 {{ song.tennhacsi }}</div>
+        <div class="song-stats">🎤 {{ song.soluong_banthuam or 0 }} bản thu</div>
+        <div class="action-buttons">
+            <button class="view-btn" onclick="event.stopPropagation(); window.location.href='/bannhac/{{ song.idbannhac }}'">Xem</button>
+            <button class="edit-btn" onclick="event.stopPropagation(); window.location.href='/bannhac/edit/{{ song.idbannhac }}'">Sửa</button>
+            <button class="delete-btn" onclick="event.stopPropagation(); deleteSong({{ song.idbannhac }})">Xóa</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    <div class="page-btn" onclick="changePage({{ page-1 }})" {% if page <= 1 %}style="opacity:0.3"{% endif %}>←</div>
+    {% for p in range(1, total_pages + 1) %}
+    <div class="page-btn {% if p == page %}active{% endif %}" onclick="changePage({{ p }})">{{ p }}</div>
+    {% endfor %}
+    <div class="page-btn" onclick="changePage({{ page+1 }})" {% if page >= total_pages %}style="opacity:0.3"{% endif %}>→</div>
+</div>
+{% endif %}
+
+<script>
+function changePage(page) {
+    window.location.href = `/bannhac?page=${page}`;
+}
+function deleteSong(id) {
+    if(confirm('Xóa bản nhạc này?')) {
+        fetch(`/api/bannhac/${id}`, {method:'DELETE'})
+        .then(r=>r.json())
+        .then(d=>{if(d.success) location.reload(); else alert(d.message)});
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thư viện - MyMusic</title>
+    {% include 'base.html' %}
+</head>
+<body>
+    <div class="app">
+        {% include 'sidebar.html' %}
+        
+        <div class="main-content">
+            <div class="top-bar">
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" placeholder="Tìm kiếm trong thư viện...">
+                </div>
+                <div class="top-actions">
+                    <div class="icon-btn">🔔</div>
+                    <div class="icon-btn">💬</div>
+                    <div class="icon-btn">👤</div>
+                </div>
+            </div>
+
+            <div class="page-header">
+                <h1 class="page-title">📚 Thư viện âm nhạc</h1>
+            </div>
+
+            <div style="text-align: center; padding: 60px; color: #8a8a9e;">
+                <div style="font-size: 4rem; margin-bottom: 20px;">📚</div>
+                <h3>Đang phát triển</h3>
+                <p>Tính năng thư viện đang được xây dựng...</p>
+            </div>
+        </div>
+
+        {% include 'player.html' %}
+    </div>
+</body>
+</html>

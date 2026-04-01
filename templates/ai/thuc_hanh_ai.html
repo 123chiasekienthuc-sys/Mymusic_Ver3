@@ -1,0 +1,1759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyMusic - Thực hành SQL với AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: #0a0a0f;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app {
+            display: flex;
+            height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #1a1a2e 0%, #0a0a0f 80%);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: rgba(10, 10, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: relative;
+            z-index: 10;
+            overflow-y: auto;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .user-info h4 {
+            font-size: 0.8rem;
+            color: #aaa;
+            font-weight: 400;
+        }
+
+        .user-info p {
+            font-weight: 600;
+            background: linear-gradient(135deg, #fff, #a0a0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #8a8a9e;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(110, 69, 255, 0.15), rgba(255, 107, 107, 0.15));
+            color: #fff;
+            border-left: 3px solid #6e45ff;
+        }
+
+        .category-section {
+            margin-top: 8px;
+        }
+
+        .category-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #5a5a72;
+            padding: 0 16px;
+            margin-bottom: 8px;
+        }
+
+        .category-item {
+            padding: 10px 16px;
+            color: #8a8a9e;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .category-item:hover,
+        .category-item.active {
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
+        }
+
+        .system-footer {
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 16px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 0;
+            overflow-y: auto;
+            padding: 24px 32px;
+            position: relative;
+        }
+
+        .main-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .main-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .main-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 20px 14px 48px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 40px;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: rgba(110, 69, 255, 0.5);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #5a5a72;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d0d0ff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        /* Page Header */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #a0a0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-subtitle {
+            color: #8a8a9e;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        /* Level Tabs */
+        .level-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .level-tab {
+            padding: 12px 30px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .level-tab.level1 {
+            background: rgba(78, 205, 196, 0.1);
+            color: #4ecdc4;
+            border-color: rgba(78, 205, 196, 0.3);
+        }
+
+        .level-tab.level1:hover,
+        .level-tab.level1.active {
+            background: #4ecdc4;
+            color: #0a0a0f;
+        }
+
+        .level-tab.level2 {
+            background: rgba(110, 69, 255, 0.1);
+            color: #6e45ff;
+            border-color: rgba(110, 69, 255, 0.3);
+        }
+
+        .level-tab.level2:hover,
+        .level-tab.level2.active {
+            background: #6e45ff;
+            color: white;
+        }
+
+        .level-tab.level3 {
+            background: rgba(255, 166, 0, 0.1);
+            color: #ffa600;
+            border-color: rgba(255, 166, 0, 0.3);
+        }
+
+        .level-tab.level3:hover,
+        .level-tab.level3.active {
+            background: #ffa600;
+            color: #0a0a0f;
+        }
+
+        .level-tab.level4 {
+            background: rgba(255, 107, 107, 0.1);
+            color: #ff6b6b;
+            border-color: rgba(255, 107, 107, 0.3);
+        }
+
+        .level-tab.level4:hover,
+        .level-tab.level4.active {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(20, 20, 30, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-info h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #a0a0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-info p {
+            color: #8a8a9e;
+            font-size: 0.9rem;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            background: rgba(20, 20, 30, 0.4);
+            padding: 15px 20px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .filter-select {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            padding: 10px 20px;
+            color: white;
+            cursor: pointer;
+            outline: none;
+            min-width: 150px;
+        }
+
+        .search-exercise {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-exercise input {
+            width: 100%;
+            padding: 10px 20px 10px 45px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            color: white;
+        }
+
+        .search-exercise .search-icon {
+            left: 15px;
+        }
+
+        /* Chat AI Button */
+        .chat-ai-btn {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(110, 69, 255, 0.4);
+            transition: all 0.3s;
+            z-index: 99;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-ai-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(110, 69, 255, 0.6);
+        }
+
+        /* Chat Modal */
+        .chat-modal {
+            display: none;
+            position: fixed;
+            bottom: 100px;
+            right: 100px;
+            width: 380px;
+            height: 500px;
+            background: rgba(20, 20, 30, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            flex-direction: column;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .chat-modal.active {
+            display: flex;
+        }
+
+        .chat-header {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border-radius: 24px 24px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chat-close {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .chat-message {
+            max-width: 85%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-message.ai {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-message.ai .message-content {
+            white-space: pre-wrap;
+        }
+
+        .chat-typing {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 18px;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .chat-typing span {
+            width: 8px;
+            height: 8px;
+            background: #6e45ff;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+        .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+
+        .chat-input-area {
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            color: white;
+            outline: none;
+        }
+
+        .chat-input-area input:focus {
+            border-color: #6e45ff;
+        }
+
+        .chat-send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Exercise Grid */
+        .exercise-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .exercise-card {
+            background: rgba(20, 20, 30, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 24px;
+            padding: 24px;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exercise-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #6e45ff, #ff6b6b);
+            transform: translateX(-100%);
+            transition: transform 0.3s;
+        }
+
+        .exercise-card:hover::before {
+            transform: translateX(0);
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(110, 69, 255, 0.3);
+            background: rgba(30, 30, 40, 0.5);
+        }
+
+        .exercise-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .exercise-code {
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(110, 69, 255, 0.2);
+            color: #6e45ff;
+        }
+
+        .exercise-level {
+            font-size: 0.8rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .level-1 { background: rgba(78, 205, 196, 0.2); color: #4ecdc4; }
+        .level-2 { background: rgba(110, 69, 255, 0.2); color: #6e45ff; }
+        .level-3 { background: rgba(255, 166, 0, 0.2); color: #ffa600; }
+        .level-4 { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; }
+
+        .exercise-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .exercise-description {
+            color: #b0b0c0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .exercise-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            color: #8a8a9e;
+            font-size: 0.85rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .exercise-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .practice-btn {
+            flex: 1;
+            padding: 10px;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .practice-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(110, 69, 255, 0.3);
+        }
+
+        .hint-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            color: #8a8a9e;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .hint-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            text-align: center;
+            padding: 60px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(110, 69, 255, 0.3);
+            border-top-color: #6e45ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 900px;
+            max-height: 85vh;
+            overflow-y: auto;
+            background: rgba(20, 20, 30, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 32px;
+            padding: 40px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8a8a9e;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .modal-header {
+            margin-bottom: 30px;
+        }
+
+        .modal-code {
+            display: inline-block;
+            padding: 6px 16px;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border-radius: 30px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #fff, #a0a0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .modal-section {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #6e45ff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sql-editor {
+            background: #1a1a2a;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.95rem;
+            color: #b0b0c0;
+            border: 1px solid rgba(110, 69, 255, 0.3);
+            white-space: pre-wrap;
+        }
+
+        .website-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(110, 69, 255, 0.2);
+            border: 1px solid rgba(110, 69, 255, 0.3);
+            border-radius: 30px;
+            color: #6e45ff;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .website-link:hover {
+            background: rgba(110, 69, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .solution-box {
+            background: linear-gradient(135deg, rgba(110, 69, 255, 0.2), rgba(255, 107, 107, 0.2));
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .solution-box.show {
+            display: block;
+        }
+
+        .toggle-solution {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            color: #8a8a9e;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+
+        .toggle-solution:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .execute-btn {
+            padding: 10px 30px;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .execute-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(110, 69, 255, 0.3);
+        }
+
+        .chat-ai-btn-inline {
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 30px;
+            color: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .result-table th {
+            background: rgba(110, 69, 255, 0.3);
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .result-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .result-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            background: #1a1a2a;
+            border: 1px solid #6e45ff;
+            border-radius: 16px;
+            padding: 20px;
+            color: #b0b0c0;
+            font-family: monospace;
+            margin: 20px 0;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+
+        /* Bottom Player Bar */
+        .bottom-player {
+            position: fixed;
+            bottom: 0;
+            left: 280px;
+            right: 0;
+            height: 80px;
+            background: rgba(10, 10, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            z-index: 100;
+        }
+
+        .now-playing {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .now-playing-img {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .now-playing-info h5 {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .now-playing-info p {
+            font-size: 0.85rem;
+            color: #8a8a9e;
+        }
+
+        .bottom-controls {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d0d0ff;
+            cursor: pointer;
+        }
+
+        .control-btn.play {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border: none;
+        }
+
+        .bottom-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #8a8a9e;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-profile">
+                <div class="avatar">🎵</div>
+                <div class="user-info">
+                    <h4>Xin chào,</h4>
+                    <p>Người dùng</p>
+                </div>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item" onclick="window.location.href='/'">
+                    <span>🏠</span> Trang chủ
+                </li>
+                <li class="nav-item">
+                    <span>📚</span> Thư viện
+                </li>
+                <li class="nav-item">
+                    <span>📈</span> Thịnh hành
+                </li>
+            </ul>
+
+            <div class="category-section">
+                <div class="category-title">DANH MỤC</div>
+                <div class="category-item" onclick="window.location.href='/bannhac'">
+                    <span>🎵</span> Bản nhạc
+                </div>
+                <div class="category-item" onclick="window.location.href='/nhacsi'">
+                    <span>🎼</span> Nhạc sĩ
+                </div>
+                <div class="category-item" onclick="window.location.href='/casi'">
+                    <span>🎤</span> Ca sĩ
+                </div>
+                <div class="category-item" onclick="window.location.href='/banthuam'">
+                    <span>🎧</span> Bản thu âm
+                </div>
+            </div>
+
+            <div class="system-footer">
+                <div class="category-item active" onclick="window.location.href='/thuc-hanh-ai'">
+                    <span>🤖</span> Thực hành AI
+                </div>
+                <div class="category-item">
+                    <span>⚙️</span> Cài đặt
+                </div>
+                <div class="category-item">
+                    <span>🚪</span> Đăng nhập
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" placeholder="Tìm kiếm bài tập...">
+                </div>
+                <div class="top-actions">
+                    <div class="icon-btn">🔔</div>
+                    <div class="icon-btn">💬</div>
+                    <div class="icon-btn">👤</div>
+                </div>
+            </div>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title">🤖 Thực hành SQL với AI</h1>
+                    <p class="page-subtitle" id="exerciseCount">Hệ thống 80 bài tập phân hóa 4 cấp độ</p>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon">🌱</div>
+                    <div class="stat-info">
+                        <h3 id="level1Count">0</h3>
+                        <p>Cơ bản (Level 1)</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-info">
+                        <h3 id="level2Count">0</h3>
+                        <p>Trung bình (Level 2)</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-info">
+                        <h3 id="level3Count">0</h3>
+                        <p>Khá (Level 3)</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🌟</div>
+                    <div class="stat-info">
+                        <h3 id="level4Count">0</h3>
+                        <p>Giỏi (Level 4)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Level Tabs -->
+            <div class="level-tabs">
+                <div class="level-tab level1 active" data-level="1">🌱 CƠ BẢN (Level 1)</div>
+                <div class="level-tab level2" data-level="2">📊 TRUNG BÌNH (Level 2)</div>
+                <div class="level-tab level3" data-level="3">⚡ KHÁ (Level 3)</div>
+                <div class="level-tab level4" data-level="4">🌟 GIỎI (Level 4)</div>
+            </div>
+
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <select class="filter-select" id="skillFilter">
+                    <option value="all">📌 Tất cả kỹ năng</option>
+                    <option value="select">SELECT</option>
+                    <option value="insert">INSERT</option>
+                    <option value="update">UPDATE</option>
+                    <option value="delete">DELETE</option>
+                    <option value="join">JOIN</option>
+                    <option value="group">GROUP BY</option>
+                    <option value="subquery">Subquery</option>
+                    <option value="view">VIEW</option>
+                    <option value="trigger">TRIGGER</option>
+                    <option value="procedure">PROCEDURE</option>
+                </select>
+
+                <select class="filter-select" id="topicFilter">
+                    <option value="all">📚 Tất cả chủ đề</option>
+                    <option value="nhacsi">Nhạc sĩ</option>
+                    <option value="casi">Ca sĩ</option>
+                    <option value="bannhac">Bản nhạc</option>
+                    <option value="banthuam">Bản thu âm</option>
+                    <option value="all">Tất cả</option>
+                </select>
+
+                <div class="search-exercise">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Tìm theo mã bài tập...">
+                </div>
+            </div>
+
+            <!-- Exercise Grid -->
+            <div id="exercisesContainer">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Đang tải bài tập...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Player Bar -->
+        <div class="bottom-player">
+            <div class="now-playing">
+                <div class="now-playing-img">🎵</div>
+                <div class="now-playing-info">
+                    <h5>Chào mừng bạn</h5>
+                    <p>Thực hành SQL với CSDL Mymusic</p>
+                </div>
+            </div>
+            <div class="bottom-controls">
+                <div class="control-btn">⏮️</div>
+                <div class="control-btn play">▶️</div>
+                <div class="control-btn">⏭️</div>
+            </div>
+            <div class="bottom-actions">
+                <span>❤️</span>
+                <span>📤</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat AI Button -->
+    <button class="chat-ai-btn" id="chatAiBtn">🤖</button>
+
+    <!-- Chat Modal -->
+    <div class="chat-modal" id="chatModal">
+        <div class="chat-header">
+            <h3>
+                <span>🤖</span> Trợ lý AI SQL
+            </h3>
+            <button class="chat-close" id="chatCloseBtn">✕</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-message ai">
+                <div class="message-content" style="white-space: pre-line;line-height: 1.3;">
+                    👋 Xin chào! Tôi là trợ lý AI về SQL.<br>
+                    Tôi có thể giúp bạn:<br>
+                    • Giải thích câu lệnh SQL<br>
+                    • Gợi ý cách viết truy vấn<br>
+                    • Sửa lỗi cú pháp<br>
+                    • Hướng dẫn thực hành<br>
+                    Hãy hỏi tôi bất cứ điều gì về SQL nhé!
+                </div>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Hỏi tôi về SQL..." onkeypress="if(event.key==='Enter') sendChatMessage()">
+            <button class="chat-send-btn" onclick="sendChatMessage()">📤</button>
+        </div>
+    </div>
+
+    <!-- Exercise Modal -->
+    <div class="modal" id="exerciseModal">
+        <div class="modal-content">
+            <div class="modal-close" onclick="closeModal()">✕</div>
+            
+            <div class="modal-header">
+                <span class="modal-code" id="modalCode">BT2.1</span>
+                <h2 class="modal-title" id="modalTitle">Liệt kê bản nhạc kèm tên nhạc sĩ</h2>
+            </div>
+
+            <div class="modal-section">
+                <div class="section-title">
+                    <span>📝 Mô tả tình huống</span>
+                </div>
+                <p id="modalDescription" style="color: #b0b0c0; line-height: 1.6;"></p>
+            </div>
+
+            <div class="modal-section">
+                <div class="section-title">
+                    <span>🎯 Yêu cầu</span>
+                </div>
+                <ul id="modalRequirements" style="color: #b0b0c0; line-height: 1.8; padding-left: 20px;"></ul>
+            </div>
+
+            <div class="modal-section">
+                <div class="section-title">
+                    <span>🌐 Quan sát trên website</span>
+                </div>
+                <a href="#" class="website-link" id="modalWebsiteLink" target="_blank">
+                    <span>🔗</span> Truy cập trang tương ứng trên website
+                </a>
+                <button class="chat-ai-btn-inline" style="margin-left: 15px;" onclick="askAIAboutExercise()">
+                    <span>🤖</span> Hỏi AI về bài tập này
+                </button>
+            </div>
+
+            <div class="modal-section">
+                <div class="section-title">
+                    <span>💻 Thực hành SQL</span>
+                </div>
+                <div class="sql-editor" id="sqlHint" style="display: none;"></div>
+                <textarea id="sqlQuery" placeholder="Nhập câu lệnh SQL của bạn vào đây..."></textarea>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button class="toggle-solution" onclick="toggleHint()">💡 Gợi ý</button>
+                    <button class="execute-btn" onclick="executeSQL()">▶️ Chạy SQL</button>
+                    <button class="toggle-solution" onclick="toggleSolution()">🔍 Xem đáp án</button>
+                </div>
+
+                <div class="solution-box" id="solutionBox">
+                    <div class="section-title">
+                        <span>✅ Đáp án</span>
+                    </div>
+                    <div class="sql-editor" id="solutionSQL"></div>
+                    <div class="section-title" style="margin-top: 20px;">
+                        <span>📖 Giải thích</span>
+                    </div>
+                    <p id="solutionExplanation" style="color: #b0b0c0;"></p>
+                </div>
+            </div>
+
+            <div class="modal-section" id="resultSection" style="display: none;">
+                <div class="section-title">
+                    <span>📊 Kết quả</span>
+                </div>
+                <div id="resultMessage" style="padding: 10px; border-radius: 10px; margin-bottom: 15px;"></div>
+                <table class="result-table" id="resultTable">
+                    <!-- Kết quả sẽ được insert bằng JavaScript -->
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let allExercises = [];
+        let currentLevel = 1;
+        let currentExercise = null;
+        let currentFilter = {
+            skill: 'all',
+            topic: 'all',
+            search: ''
+        };
+
+        // Chat variables
+        let isWaitingForAI = false;
+
+        // Load exercises from API
+        async function loadExercises() {
+            try {
+                const response = await fetch('/api/exercises');
+                const data = await response.json();
+                
+                if (data.success) {
+                    allExercises = data.data;
+                    updateStats();
+                    renderExercises();
+                } else {
+                    console.error('Error loading exercises:', data.error);
+                    document.getElementById('exercisesContainer').innerHTML = `
+                        <div style="text-align: center; padding: 60px; color: #ff6b6b;">
+                            <div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div>
+                            <h3>Không thể tải bài tập</h3>
+                            <p>${data.error || 'Vui lòng thử lại sau'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('exercisesContainer').innerHTML = `
+                    <div style="text-align: center; padding: 60px; color: #ff6b6b;">
+                        <div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div>
+                        <h3>Lỗi kết nối</h3>
+                        <p>Không thể kết nối đến server. Vui lòng thử lại sau.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const level1 = allExercises.filter(e => e.level === 1).length;
+            const level2 = allExercises.filter(e => e.level === 2).length;
+            const level3 = allExercises.filter(e => e.level === 3).length;
+            const level4 = allExercises.filter(e => e.level === 4).length;
+            
+            document.getElementById('level1Count').textContent = level1;
+            document.getElementById('level2Count').textContent = level2;
+            document.getElementById('level3Count').textContent = level3;
+            document.getElementById('level4Count').textContent = level4;
+            
+            document.getElementById('exerciseCount').textContent = 
+                `Hệ thống ${allExercises.length} bài tập phân hóa 4 cấp độ`;
+        }
+
+        // Filter exercises
+        function getFilteredExercises() {
+            return allExercises.filter(exercise => {
+                if (exercise.level !== currentLevel) return false;
+                if (currentFilter.skill !== 'all' && exercise.skill !== currentFilter.skill) return false;
+                if (currentFilter.topic !== 'all' && exercise.topic !== currentFilter.topic) return false;
+                if (currentFilter.search && !exercise.code.toLowerCase().includes(currentFilter.search.toLowerCase())) return false;
+                return true;
+            });
+        }
+
+        // Render exercises
+        function renderExercises() {
+            const filtered = getFilteredExercises();
+            const container = document.getElementById('exercisesContainer');
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 60px; color: #8a8a9e;">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">📭</div>
+                        <h3>Không tìm thấy bài tập</h3>
+                        <p>Không có bài tập nào phù hợp với bộ lọc của bạn.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="exercise-grid">
+                    ${filtered.map(ex => `
+                        <div class="exercise-card" data-code="${ex.code}">
+                            <div class="exercise-header">
+                                <span class="exercise-code">${escapeHtml(ex.code)}</span>
+                                <span class="exercise-level level-${ex.level}">${ex.level === 1 ? '🌱 CƠ BẢN' : ex.level === 2 ? '📊 TRUNG BÌNH' : ex.level === 3 ? '⚡ KHÁ' : '🌟 GIỎI'}</span>
+                            </div>
+                            <h3 class="exercise-title">${escapeHtml(ex.title)}</h3>
+                            <p class="exercise-description">${escapeHtml(ex.description)}</p>
+                            <div class="exercise-meta">
+                                <span class="meta-item">${getTopicIcon(ex.topic)} ${getTopicName(ex.topic)}</span>
+                                <span class="meta-item">📝 ${ex.skill ? ex.skill.toUpperCase() : 'SQL'}</span>
+                            </div>
+                            <div class="exercise-actions">
+                                <button class="practice-btn" onclick="openExercise('${ex.code}')">Thực hành</button>
+                                <button class="hint-btn" onclick="showHint('${ex.code}')">Gợi ý</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Helper functions
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function getTopicIcon(topic) {
+            const icons = {
+                'nhacsi': '🎼',
+                'casi': '🎤',
+                'bannhac': '🎵',
+                'banthuam': '🎧',
+                'all': '📚'
+            };
+            return icons[topic] || '📌';
+        }
+
+        function getTopicName(topic) {
+            const names = {
+                'nhacsi': 'Nhạc sĩ',
+                'casi': 'Ca sĩ',
+                'bannhac': 'Bản nhạc',
+                'banthuam': 'Bản thu âm',
+                'all': 'Tất cả'
+            };
+            return names[topic] || topic;
+        }
+
+        // Open exercise modal (KHÔNG HIỂN THỊ CÂU LỆNH ĐÚNG)
+        async function openExercise(code) {
+            try {
+                const response = await fetch(`/api/exercises/${code}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentExercise = data.data;
+                    showExerciseModal();
+                } else {
+                    alert('Không thể tải thông tin bài tập');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra');
+            }
+        }
+
+        // Show hint
+        async function showHint(code) {
+            try {
+                const response = await fetch(`/api/exercises/${code}`);
+                const data = await response.json();
+                
+                if (data.success && data.data.hint) {
+                    alert('💡 Gợi ý:\n\n' + data.data.hint);
+                } else {
+                    alert('Chưa có gợi ý cho bài tập này');
+                }
+            } catch (error) {
+                alert('Có lỗi xảy ra');
+            }
+        }
+
+        // Show exercise modal (KHÔNG ĐIỀN SẴN SQL)
+        function showExerciseModal() {
+            if (!currentExercise) return;
+            
+            document.getElementById('modalCode').textContent = currentExercise.code;
+            document.getElementById('modalTitle').textContent = currentExercise.title;
+            document.getElementById('modalDescription').textContent = currentExercise.description;
+            
+            // Requirements
+            const reqList = document.getElementById('modalRequirements');
+            reqList.innerHTML = '';
+            if (currentExercise.requirements && currentExercise.requirements.length) {
+                currentExercise.requirements.forEach(req => {
+                    const li = document.createElement('li');
+                    li.textContent = req;
+                    reqList.appendChild(li);
+                });
+            }
+            
+            // Website link
+            const link = document.getElementById('modalWebsiteLink');
+            link.href = currentExercise.website_link || '#';
+            
+            // Hint (KHÔNG HIỂN THỊ MẶC ĐỊNH)
+            document.getElementById('sqlHint').innerHTML = currentExercise.hint || 'Chưa có gợi ý';
+            
+            // SQL Editor - ĐỂ TRỐNG (KHÔNG ĐIỀN SẴN)
+            document.getElementById('sqlQuery').value = '';
+            
+            // Solution - ẨN ĐI (chỉ hiện khi nhấn nút)
+            document.getElementById('solutionSQL').innerHTML = currentExercise.solution || '';
+            document.getElementById('solutionExplanation').innerHTML = currentExercise.explanation || '';
+            
+            // Hide result section
+            document.getElementById('resultSection').style.display = 'none';
+            document.getElementById('solutionBox').classList.remove('show');
+            document.getElementById('sqlHint').style.display = 'none';
+            
+            // Show modal
+            document.getElementById('exerciseModal').classList.add('active');
+        }
+
+        // Ask AI about current exercise
+        function askAIAboutExercise() {
+            if (!currentExercise) return;
+            
+            // Close modal and open chat with context
+            closeModal();
+            
+            // Open chat modal
+            document.getElementById('chatModal').classList.add('active');
+            
+            // Send question to AI
+            const question = `Tôi đang làm bài tập ${currentExercise.code}: ${currentExercise.title}. Mô tả: ${currentExercise.description}. Hãy giúp tôi hướng dẫn cách viết câu lệnh SQL cho bài tập này.`;
+            
+            // Add user message to chat
+            addMessageToChat(question, 'user');
+            
+            // Send to AI
+            sendToAI(question);
+        }
+
+        // Chat functions
+        function toggleChat() {
+            const modal = document.getElementById('chatModal');
+            modal.classList.toggle('active');
+        }
+
+        function addMessageToChat(message, sender) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = message.replace(/\n/g, '<br>');
+            messageDiv.appendChild(contentDiv);
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const chatMessages = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'chat-typing';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = '<span></span><span></span><span></span>';
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        async function sendToAI(message) {
+            if (isWaitingForAI) return;
+            
+            isWaitingForAI = true;
+            showTypingIndicator();
+            
+            try {
+                const response = await fetch('/api/ai-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        context: `Database: mymusic với các bảng nhacsi, casi, bannhac, banthuam. Bài tập hiện tại: ${currentExercise ? currentExercise.code + ' - ' + currentExercise.title : 'không có'}`
+                    })
+                });
+                
+                const data = await response.json();
+                removeTypingIndicator();
+                
+                if (data.success) {
+                    addMessageToChat(data.response, 'ai');
+                } else {
+                    addMessageToChat('Xin lỗi, tôi gặp lỗi: ' + (data.error || 'Không xác định'), 'ai');
+                }
+            } catch (error) {
+                removeTypingIndicator();
+                addMessageToChat('Xin lỗi, không thể kết nối đến AI server. Vui lòng thử lại sau.', 'ai');
+            }
+            
+            isWaitingForAI = false;
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            input.value = '';
+            addMessageToChat(message, 'user');
+            await sendToAI(message);
+        }
+
+        // Modal functions
+        function closeModal() {
+            document.getElementById('exerciseModal').classList.remove('active');
+            currentExercise = null;
+        }
+
+        function toggleHint() {
+            const hint = document.getElementById('sqlHint');
+            hint.style.display = hint.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleSolution() {
+            document.getElementById('solutionBox').classList.toggle('show');
+        }
+
+        // Execute SQL
+        async function executeSQL() {
+            if (!currentExercise) return;
+            
+            const sql = document.getElementById('sqlQuery').value.trim();
+            if (!sql) {
+                alert('Vui lòng nhập câu lệnh SQL');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/check-sql', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        exercise_code: currentExercise.code,
+                        sql: sql
+                    })
+                });
+                
+                const result = await response.json();
+                displayResult(result);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi thực thi SQL');
+            }
+        }
+
+        // Display result
+        function displayResult(result) {
+            const resultSection = document.getElementById('resultSection');
+            const resultMessage = document.getElementById('resultMessage');
+            const resultTable = document.getElementById('resultTable');
+            
+            resultSection.style.display = 'block';
+            
+            if (result.error) {
+                resultMessage.innerHTML = `<div style="background: rgba(255,107,107,0.2); padding: 10px; border-radius: 10px; color: #ff6b6b;">❌ Lỗi: ${result.error}</div>`;
+                resultTable.innerHTML = '';
+                return;
+            }
+            
+            if (result.is_correct) {
+                resultMessage.innerHTML = `<div style="background: rgba(78,205,196,0.2); padding: 10px; border-radius: 10px; color: #4ecdc4;">✅ ${result.feedback || 'Chính xác!'} (Thời gian: ${result.execution_time?.toFixed(3)}s)</div>`;
+            } else {
+                resultMessage.innerHTML = `<div style="background: rgba(255,107,107,0.2); padding: 10px; border-radius: 10px; color: #ff6b6b;">❌ ${result.feedback || 'Sai'}</div>`;
+            }
+            
+            // Display result table if any
+            if (result.user_result && result.user_result.length > 0) {
+                const columns = Object.keys(result.user_result[0]);
+                resultTable.innerHTML = `
+                    <thead>
+                        <tr>${columns.map(col => `<th>${col}</th>`).join('')}</tr>
+                    </thead>
+                    <tbody>
+                        ${result.user_result.map(row => `
+                            <tr>${columns.map(col => `<td>${row[col] !== null ? row[col] : 'NULL'}</td>`).join('')}</tr>
+                        `).join('')}
+                    </tbody>
+                `;
+            } else {
+                resultTable.innerHTML = '<tr><td style="text-align: center;">Không có dữ liệu</td></tr>';
+            }
+        }
+
+        // Event listeners
+        document.querySelectorAll('.level-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.level-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentLevel = parseInt(this.dataset.level);
+                renderExercises();
+            });
+        });
+
+        document.getElementById('skillFilter').addEventListener('change', function() {
+            currentFilter.skill = this.value;
+            renderExercises();
+        });
+
+        document.getElementById('topicFilter').addEventListener('change', function() {
+            currentFilter.topic = this.value;
+            renderExercises();
+        });
+
+        document.getElementById('searchInput').addEventListener('input', function() {
+            currentFilter.search = this.value;
+            renderExercises();
+        });
+
+        // Chat event listeners
+        document.getElementById('chatAiBtn').addEventListener('click', function() {
+            document.getElementById('chatModal').classList.toggle('active');
+        });
+
+        document.getElementById('chatCloseBtn').addEventListener('click', function() {
+            document.getElementById('chatModal').classList.remove('active');
+        });
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('exerciseModal');
+            const chatModal = document.getElementById('chatModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+            if (event.target === chatModal) {
+                chatModal.classList.remove('active');
+            }
+        }
+
+        // Initial load
+        loadExercises();
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+MYSQL_DATABASE railway
+MYSQL_PUBLIC_URL mysql://root:FJLMQpLSJZgzdwGTIOloLGzBCOypNCqz@interchange.proxy.rlwy.net:58957/railway
+MYSQL_ROOT_PASSWORD FJLMQpLSJZgzdwGTIOloLGzBCOypNCqz
+MYSQL_URL mysql://root:FJLMQpLSJZgzdwGTIOloLGzBCOypNCqz@mysql.railway.internal:3306/railway
+MYSQLDATABASE railway
+MYSQLHOST mysql.railway.internal
+MYSQLPASSWORD FJLMQpLSJZgzdwGTIOloLGzBCOypNCqz
+MYSQLPORT 3306
+MYSQLUSER root
+
+
+
+
+
+

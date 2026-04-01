@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Sửa nhạc sĩ - MyMusic{% endblock %}
+
+{% block content %}
+<div class="back-btn" onclick="window.location.href='/nhacsi/{{ nhacsi.idnhacsi }}'">
+    <span>←</span> Quay lại trang chi tiết
+</div>
+
+<div class="form-container">
+    <h1 class="form-title">✏️ Chỉnh sửa nhạc sĩ</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{% if category == 'success' %}✅{% elif category == 'danger' %}❌{% else %}⚠️{% endif %} {{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="/nhacsi/edit/{{ nhacsi.idnhacsi }}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="form-group">
+            <label class="form-label">Tên nhạc sĩ <span style="color:#ff6b6b;">*</span></label>
+            <input type="text" name="tennhacsi" class="form-control" value="{{ nhacsi.tennhacsi }}" required>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Ngày sinh</label>
+                <input type="date" name="ngaysinh" class="form-control" 
+                       value="{{ nhacsi.ngaysinh.strftime('%Y-%m-%d') if nhacsi.ngaysinh else '' }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Giới tính</label>
+                <select name="gioitinh" class="form-control">
+                    <option value="">-- Chọn giới tính --</option>
+                    <option value="Nam" {% if nhacsi.gioitinh == 'Nam' %}selected{% endif %}>Nam</option>
+                    <option value="Nữ" {% if nhacsi.gioitinh == 'Nữ' %}selected{% endif %}>Nữ</option>
+                    <option value="Khác" {% if nhacsi.gioitinh == 'Khác' %}selected{% endif %}>Khác</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Quê quán</label>
+            <input type="text" name="quequan" class="form-control" value="{{ nhacsi.quequan or '' }}">
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Ảnh đại diện</label>
+            {% if nhacsi.avatar %}
+            <div class="current-image">
+                <img src="{{ url_for('static', filename='images/artists/' + nhacsi.avatar) }}" alt="Current">
+                <span>Ảnh hiện tại: {{ nhacsi.avatar }}</span>
+            </div>
+            {% endif %}
+            <div class="file-input">
+                <input type="file" name="avatar" accept="image/*" onchange="previewFile(this)">
+                <div class="file-label">
+                    <span>📸</span>
+                    <span>Chọn ảnh mới (để trống nếu không thay đổi)</span>
+                </div>
+            </div>
+            <img id="preview" class="preview-image" src="#" alt="Preview">
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Tiểu sử</label>
+            <textarea name="tieusu" class="form-control" rows="5">{{ nhacsi.tieusu or '' }}</textarea>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">💾 Cập nhật</button>
+            <button type="button" class="btn-cancel" onclick="window.location.href='/nhacsi/{{ nhacsi.idnhacsi }}'">❌ Hủy</button>
+        </div>
+    </form>
+</div>
+
+<script>
+function previewFile(input) {
+    const preview = document.getElementById('preview');
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+    } else {
+        preview.src = '#';
+        preview.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

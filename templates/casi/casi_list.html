@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Danh sách ca sĩ - MyMusic{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">🎤 Danh sách ca sĩ</h1>
+    <a href="/casi/add" class="add-btn"><span>➕</span> Thêm ca sĩ</a>
+</div>
+
+<div class="filter-bar">
+    <div class="filter-tabs">
+        <div class="filter-tab active" data-filter="all">Tất cả</div>
+        <div class="filter-tab" data-filter="newest">Mới nhất</div>
+        <div class="filter-tab" data-filter="most_recordings">Nhiều bản thu</div>
+    </div>
+    <select class="filter-select" id="sortSelect">
+        <option value="name_asc">Tên A-Z</option>
+        <option value="name_desc">Tên Z-A</option>
+        <option value="newest">Mới nhất</option>
+    </select>
+</div>
+
+<div class="singers-grid">
+    {% for singer in casi_list %}
+    <div class="singer-card" onclick="window.location.href='/casi/{{ singer.idcasi }}'">
+        <div class="singer-avatar">
+            {% if singer.anhdaidien %}
+                <img src="{{ url_for('static', filename='images/singers/' + singer.anhdaidien) }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
+            {% else %}
+                {{ singer.tencasi[:2]|upper }}
+            {% endif %}
+        </div>
+        <div class="singer-name">{{ singer.tencasi }}</div>
+        <div class="singer-count">{{ singer.soluong_banthuam or 0 }} bản thu</div>
+        <button class="follow-btn" onclick="event.stopPropagation()">Theo dõi</button>
+    </div>
+    {% endfor %}
+</div>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    <div class="page-btn" onclick="changePage({{ page-1 }})" {% if page <= 1 %}style="opacity:0.3"{% endif %}>←</div>
+    {% for p in range(1, total_pages + 1) %}
+    <div class="page-btn {% if p == page %}active{% endif %}" onclick="changePage({{ p }})">{{ p }}</div>
+    {% endfor %}
+    <div class="page-btn" onclick="changePage({{ page+1 }})" {% if page >= total_pages %}style="opacity:0.3"{% endif %}>→</div>
+</div>
+{% endif %}
+
+<script>
+function changePage(page) {
+    window.location.href = `/casi?page=${page}`;
+}
+</script>
+{% endblock %}

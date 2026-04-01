@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyMusic - Quản lý bài tập SQL</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: #0a0a0f;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Header */
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            background: rgba(20, 20, 30, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 20px 30px;
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #a0a0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .header-title p {
+            color: #8a8a9e;
+            font-size: 0.95rem;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .stat-badge {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #6e45ff;
+        }
+
+        .stat-label {
+            color: #8a8a9e;
+            font-size: 0.85rem;
+        }
+
+        /* Navigation Tabs */
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: rgba(20, 20, 30, 0.4);
+            padding: 8px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 30px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            background: transparent;
+            color: #8a8a9e;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            color: white;
+        }
+
+        /* Exercise Form */
+        .exercise-form {
+            background: rgba(20, 20, 30, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            padding: 40px;
+            margin-bottom: 40px;
+            display: none;
+        }
+
+        .exercise-form.active {
+            display: block;
+        }
+
+        .form-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, #fff, #a0a0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #d0d0ff;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .form-label .required {
+            color: #ff6b6b;
+            margin-left: 4px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #6e45ff;
+            box-shadow: 0 0 0 3px rgba(110, 69, 255, 0.2);
+        }
+
+        .form-control::placeholder {
+            color: #5a5a72;
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Requirements List */
+        .requirements-list {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .requirement-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .requirement-input {
+            flex: 1;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .remove-req {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .remove-req:hover {
+            background: rgba(255, 107, 107, 0.3);
+        }
+
+        .add-req-btn {
+            padding: 10px 20px;
+            background: rgba(78, 205, 196, 0.2);
+            border: 1px solid rgba(78, 205, 196, 0.3);
+            border-radius: 30px;
+            color: #4ecdc4;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .add-req-btn:hover {
+            background: rgba(78, 205, 196, 0.3);
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            gap: 20px;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(110, 69, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #8a8a9e;
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .btn-danger {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 107, 107, 0.3);
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            background: rgba(20, 20, 30, 0.4);
+            padding: 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .filter-select {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            padding: 12px 20px;
+            color: white;
+            cursor: pointer;
+            outline: none;
+            min-width: 150px;
+        }
+
+        .search-box {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            color: white;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #5a5a72;
+        }
+
+        /* Exercises Table */
+        .exercises-table-container {
+            background: rgba(20, 20, 30, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .exercises-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .exercises-table th {
+            text-align: left;
+            padding: 15px;
+            color: #d0d0ff;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .exercises-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .exercises-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .level-badge {
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .level-1 { background: rgba(78, 205, 196, 0.2); color: #4ecdc4; }
+        .level-2 { background: rgba(110, 69, 255, 0.2); color: #6e45ff; }
+        .level-3 { background: rgba(255, 166, 0, 0.2); color: #ffa600; }
+        .level-4 { background: rgba(255, 107, 107, 0.2); color: #ff6b6b; }
+
+        .skill-tag {
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #b0b0c0;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-btn {
+            background: rgba(78, 205, 196, 0.2);
+            color: #4ecdc4;
+        }
+
+        .edit-btn:hover {
+            background: rgba(78, 205, 196, 0.3);
+        }
+
+        .delete-btn {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+        }
+
+        .delete-btn:hover {
+            background: rgba(255, 107, 107, 0.3);
+        }
+
+        .view-btn {
+            background: rgba(110, 69, 255, 0.2);
+            color: #6e45ff;
+        }
+
+        .view-btn:hover {
+            background: rgba(110, 69, 255, 0.3);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(20, 20, 30, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8a8a9e;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .page-btn.active {
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            color: white;
+        }
+
+        .page-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 500px;
+            background: rgba(20, 20, 30, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            padding: 40px;
+            position: relative;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #ff6b6b;
+        }
+
+        .modal-body {
+            color: #b0b0c0;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 20px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .modal-btn.confirm {
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            color: white;
+        }
+
+        .modal-btn.cancel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #8a8a9e;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Alert Messages */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-success {
+            background: rgba(78, 205, 196, 0.2);
+            border: 1px solid #4ecdc4;
+            color: #4ecdc4;
+        }
+
+        .alert-danger {
+            background: rgba(255, 107, 107, 0.2);
+            border: 1px solid #ff6b6b;
+            color: #ff6b6b;
+        }
+
+        .alert-info {
+            background: rgba(110, 69, 255, 0.2);
+            border: 1px solid #6e45ff;
+            color: #6e45ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header -->
+        <div class="admin-header">
+            <div class="header-title">
+                <h1>📚 Quản lý hệ thống bài tập SQL</h1>
+                <p>Quản lý 80 bài tập phân hóa 4 cấp độ theo chương trình GDPT 2018</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-badge">
+                    <div class="stat-number" id="totalExercises">80</div>
+                    <div class="stat-label">Tổng số bài</div>
+                </div>
+                <div class="stat-badge">
+                    <div class="stat-number" id="totalAttempts">0</div>
+                    <div class="stat-label">Lượt làm</div>
+                </div>
+                <div class="stat-badge">
+                    <div class="stat-number" id="successRate">0%</div>
+                    <div class="stat-label">Tỉ lệ đúng</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="admin-tabs">
+            <button class="tab-btn active" onclick="switchTab('list')">📋 Danh sách bài tập</button>
+            <button class="tab-btn" onclick="switchTab('add')">➕ Thêm bài tập mới</button>
+            <button class="tab-btn" onclick="switchTab('stats')">📊 Thống kê</button>
+            <button class="tab-btn" onclick="switchTab('import')">📎 Import/Export</button>
+        </div>
+
+        <!-- Add/Edit Exercise Form -->
+        <div class="exercise-form active" id="formTab">
+            <div class="form-title" id="formTitle">
+                <span>➕</span> Thêm bài tập mới
+            </div>
+            
+            <div id="alertMessage"></div>
+
+            <form id="exerciseForm">
+                <input type="hidden" id="exerciseId">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Mã bài tập <span class="required">*</span></label>
+                        <input type="text" id="code" class="form-control" placeholder="VD: BT1.1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Cấp độ <span class="required">*</span></label>
+                        <select id="level" class="form-control" required>
+                            <option value="1">🌱 Level 1 - Cơ bản</option>
+                            <option value="2">📊 Level 2 - Trung bình</option>
+                            <option value="3">⚡ Level 3 - Khá</option>
+                            <option value="4">🌟 Level 4 - Giỏi</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="form-label">Tiêu đề <span class="required">*</span></label>
+                    <input type="text" id="title" class="form-control" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="form-label">Mô tả <span class="required">*</span></label>
+                    <textarea id="description" class="form-control" rows="3" required></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="form-label">Yêu cầu</label>
+                    <div id="requirementsList" class="requirements-list">
+                        <div class="requirement-item">
+                            <input type="text" class="requirement-input" placeholder="Yêu cầu 1">
+                            <button type="button" class="remove-req" onclick="removeRequirement(this)">✕</button>
+                        </div>
+                    </div>
+                    <button type="button" class="add-req-btn" onclick="addRequirement()">
+                        <span>➕</span> Thêm yêu cầu
+                    </button>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Link website</label>
+                        <input type="text" id="websiteLink" class="form-control" placeholder="/nhacsi">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Kỹ năng</label>
+                        <select id="skill" class="form-control">
+                            <option value="select">SELECT</option>
+                            <option value="insert">INSERT</option>
+                            <option value="update">UPDATE</option>
+                            <option value="delete">DELETE</option>
+                            <option value="join">JOIN</option>
+                            <option value="group">GROUP BY</option>
+                            <option value="subquery">Subquery</option>
+                            <option value="view">VIEW</option>
+                            <option value="trigger">TRIGGER</option>
+                            <option value="procedure">PROCEDURE</option>
+                            <option value="function">FUNCTION</option>
+                            <option value="design">Design</option>
+                            <option value="optimize">Optimize</option>
+                            <option value="security">Security</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Chủ đề</label>
+                        <select id="topic" class="form-control">
+                            <option value="nhacsi">Nhạc sĩ</option>
+                            <option value="casi">Ca sĩ</option>
+                            <option value="bannhac">Bản nhạc</option>
+                            <option value="banthuam">Bản thu âm</option>
+                            <option value="all">Tất cả</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Thứ tự</label>
+                        <input type="number" id="sortOrder" class="form-control" value="0">
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="form-label">Gợi ý (Hint)</label>
+                    <textarea id="hint" class="form-control" rows="2"></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="form-label">Câu lệnh mẫu (Solution) <span class="required">*</span></label>
+                    <textarea id="solution" class="form-control" rows="3" required></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="form-label">Giải thích</label>
+                    <textarea id="explanation" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="form-label">SQL mặc định</label>
+                    <textarea id="defaultQuery" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <span>💾</span> Lưu bài tập
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                        <span>🔄</span> Làm mới
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Exercises List Tab -->
+        <div class="exercise-form" id="listTab">
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <select class="filter-select" id="filterLevel">
+                    <option value="all">📌 Tất cả cấp độ</option>
+                    <option value="1">🌱 Level 1 - Cơ bản</option>
+                    <option value="2">📊 Level 2 - Trung bình</option>
+                    <option value="3">⚡ Level 3 - Khá</option>
+                    <option value="4">🌟 Level 4 - Giỏi</option>
+                </select>
+
+                <select class="filter-select" id="filterSkill">
+                    <option value="all">📚 Tất cả kỹ năng</option>
+                    <option value="select">SELECT</option>
+                    <option value="insert">INSERT</option>
+                    <option value="update">UPDATE</option>
+                    <option value="delete">DELETE</option>
+                    <option value="join">JOIN</option>
+                    <option value="group">GROUP BY</option>
+                </select>
+
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Tìm kiếm theo mã, tiêu đề...">
+                </div>
+
+                <button class="btn btn-primary" onclick="loadExercises()">
+                    <span>🔍</span> Tìm kiếm
+                </button>
+            </div>
+
+            <!-- Exercises Table -->
+            <div class="exercises-table-container">
+                <table class="exercises-table">
+                    <thead>
+                        <tr>
+                            <th>Mã</th>
+                            <th>Cấp độ</th>
+                            <th>Tiêu đề</th>
+                            <th>Kỹ năng</th>
+                            <th>Chủ đề</th>
+                            <th>Lượt làm</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="exercisesTableBody">
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 50px;">
+                                <div class="loading"></div>
+                                <p style="color: #8a8a9e; margin-top: 20px;">Đang tải dữ liệu...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="pagination"></div>
+        </div>
+
+        <!-- Stats Tab -->
+        <div class="exercise-form" id="statsTab">
+            <div class="form-title">📊 Thống kê chi tiết</div>
+            
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
+                <!-- Level Stats -->
+                <div style="background: rgba(0,0,0,0.2); border-radius: 20px; padding: 20px;">
+                    <h3 style="color: #d0d0ff; margin-bottom: 20px;">Theo cấp độ</h3>
+                    <canvas id="levelChart" style="width: 100%; height: 300px;"></canvas>
+                </div>
+                
+                <!-- Skill Stats -->
+                <div style="background: rgba(0,0,0,0.2); border-radius: 20px; padding: 20px;">
+                    <h3 style="color: #d0d0ff; margin-bottom: 20px;">Theo kỹ năng</h3>
+                    <canvas id="skillChart" style="width: 100%; height: 300px;"></canvas>
+                </div>
+            </div>
+
+            <!-- Success Rate Table -->
+            <div style="background: rgba(0,0,0,0.2); border-radius: 20px; padding: 20px;">
+                <h3 style="color: #d0d0ff; margin-bottom: 20px;">Tỉ lệ thành công theo bài tập</h3>
+                <table class="exercises-table">
+                    <thead>
+                        <tr>
+                            <th>Mã bài</th>
+                            <th>Tiêu đề</th>
+                            <th>Lượt làm</th>
+                            <th>Lượt đúng</th>
+                            <th>Tỉ lệ</th>
+                            <th>Thời gian TB</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 30px;">
+                                <div class="loading"></div>
+                                <p style="color: #8a8a9e;">Đang tải dữ liệu...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Import/Export Tab -->
+        <div class="exercise-form" id="importTab">
+            <div class="form-title">📎 Import/Export dữ liệu</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <!-- Export -->
+                <div style="background: rgba(0,0,0,0.2); border-radius: 20px; padding: 30px;">
+                    <h3 style="color: #d0d0ff; margin-bottom: 20px;">📤 Export</h3>
+                    <p style="color: #b0b0c0; margin-bottom: 30px;">Xuất toàn bộ dữ liệu bài tập ra file JSON</p>
+                    <button class="btn btn-primary" onclick="exportExercises()">
+                        <span>📥</span> Tải về exercises.json
+                    </button>
+                </div>
+
+                <!-- Import -->
+                <div style="background: rgba(0,0,0,0.2); border-radius: 20px; padding: 30px;">
+                    <h3 style="color: #d0d0ff; margin-bottom: 20px;">📥 Import</h3>
+                    <p style="color: #b0b0c0; margin-bottom: 30px;">Import dữ liệu từ file JSON</p>
+                    <input type="file" id="importFile" accept=".json" style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('importFile').click()">
+                        <span>📤</span> Chọn file JSON
+                    </button>
+                    <button class="btn btn-secondary" onclick="importExercises()" style="margin-top: 10px; width: 100%;">
+                        <span>🔄</span> Import dữ liệu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-title">⚠️ Xác nhận xóa</div>
+            <div class="modal-body">
+                Bạn có chắc muốn xóa bài tập <span id="deleteExerciseCode"></span>?
+                Hành động này không thể hoàn tác.
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn confirm" onclick="confirmDelete()">Xóa</button>
+                <button class="modal-btn cancel" onclick="closeModal()">Hủy</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Global variables
+        let currentExercises = [];
+        let deleteId = null;
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadExercises();
+            loadStats();
+        });
+
+        // Switch tabs
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.exercise-form').forEach(form => form.classList.remove('active'));
+            
+            document.querySelector(`.tab-btn[onclick*="${tabName}"]`).classList.add('active');
+            
+            if (tabName === 'list') {
+                document.getElementById('listTab').classList.add('active');
+                loadExercises();
+            } else if (tabName === 'add') {
+                document.getElementById('formTab').classList.add('active');
+                resetForm();
+            } else if (tabName === 'stats') {
+                document.getElementById('statsTab').classList.add('active');
+                loadStats();
+            } else if (tabName === 'import') {
+                document.getElementById('importTab').classList.add('active');
+            }
+        }
+
+        // Load exercises with filters
+        async function loadExercises(page = 1) {
+            currentPage = page;
+            
+            const level = document.getElementById('filterLevel').value;
+            const skill = document.getElementById('filterSkill').value;
+            const search = document.getElementById('searchInput').value;
+            
+            let url = '/api/exercises?';
+            if (level !== 'all') url += `level=${level}&`;
+            if (skill !== 'all') url += `skill=${skill}&`;
+            if (search) url += `search=${encodeURIComponent(search)}&`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentExercises = data.data;
+                    renderExercisesTable(page);
+                } else {
+                    showAlert('danger', 'Lỗi: ' + data.error);
+                }
+            } catch (error) {
+                showAlert('danger', 'Lỗi kết nối: ' + error);
+            }
+        }
+
+        // Render exercises table
+        function renderExercisesTable(page) {
+            const tbody = document.getElementById('exercisesTableBody');
+            const start = (page - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const paginatedExercises = currentExercises.slice(start, end);
+            
+            if (paginatedExercises.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 50px;">
+                            <div style="font-size: 3rem; margin-bottom: 20px;">📭</div>
+                            <p style="color: #8a8a9e;">Không tìm thấy bài tập nào</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = paginatedExercises.map(ex => `
+                    <tr>
+                        <td><strong>${ex.code}</strong></td>
+                        <td><span class="level-badge level-${ex.level}">Level ${ex.level}</span></td>
+                        <td>${ex.title}</td>
+                        <td><span class="skill-tag">${ex.skill}</span></td>
+                        <td>${ex.topic}</td>
+                        <td>${ex.attempts || 0}</td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="action-btn view-btn" onclick="viewExercise('${ex.code}')" title="Xem">👁️</button>
+                                <button class="action-btn edit-btn" onclick="editExercise('${ex.code}')" title="Sửa">✏️</button>
+                                <button class="action-btn delete-btn" onclick="showDeleteModal(${ex.id}, '${ex.code}')" title="Xóa">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            renderPagination();
+        }
+
+        // Render pagination
+        function renderPagination() {
+            const totalPages = Math.ceil(currentExercises.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            
+            // Previous button
+            html += `<div class="page-btn" onclick="loadExercises(${currentPage - 1})" ${currentPage <= 1 ? 'style="opacity:0.3;pointer-events:none;"' : ''}>←</div>`;
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage || 
+                    (i >= currentPage - 2 && i <= currentPage + 2) ||
+                    i === 1 || i === totalPages) {
+                    html += `<div class="page-btn ${i === currentPage ? 'active' : ''}" onclick="loadExercises(${i})">${i}</div>`;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    html += `<div style="color: #8a8a9e;">...</div>`;
+                }
+            }
+            
+            // Next button
+            html += `<div class="page-btn" onclick="loadExercises(${currentPage + 1})" ${currentPage >= totalPages ? 'style="opacity:0.3;pointer-events:none;"' : ''}>→</div>`;
+            
+            pagination.innerHTML = html;
+        }
+
+        // Load statistics
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/exercise-stats');
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderStats(data.data);
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Render statistics with charts
+        function renderStats(stats) {
+            // Level chart
+            const levelCtx = document.getElementById('levelChart').getContext('2d');
+            const levelData = {
+                labels: ['Level 1', 'Level 2', 'Level 3', 'Level 4'],
+                datasets: [{
+                    label: 'Số bài tập',
+                    data: [
+                        stats.filter(s => s.level === 1).length,
+                        stats.filter(s => s.level === 2).length,
+                        stats.filter(s => s.level === 3).length,
+                        stats.filter(s => s.level === 4).length
+                    ],
+                    backgroundColor: ['#4ecdc4', '#6e45ff', '#ffa600', '#ff6b6b']
+                }]
+            };
+            
+            new Chart(levelCtx, {
+                type: 'doughnut',
+                data: levelData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#fff' }
+                        }
+                    }
+                }
+            });
+            
+            // Stats table
+            const tbody = document.getElementById('statsTableBody');
+            tbody.innerHTML = stats.map(s => `
+                <tr>
+                    <td>${s.code}</td>
+                    <td>${s.title}</td>
+                    <td>${s.total_attempts || 0}</td>
+                    <td>${Math.round((s.success_rate || 0) * (s.total_attempts || 0) / 100) || 0}</td>
+                    <td>${s.success_rate || 0}%</td>
+                    <td>${(s.avg_execution_time || 0).toFixed(3)}s</td>
+                </tr>
+            `).join('');
+        }
+
+        // View exercise
+        function viewExercise(code) {
+            window.open(`/thuc-hanh-ai?exercise=${code}`, '_blank');
+        }
+
+        // Edit exercise
+        async function editExercise(code) {
+            try {
+                const response = await fetch(`/api/exercises/${code}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const ex = data.data;
+                    
+                    // Fill form
+                    document.getElementById('exerciseId').value = ex.id;
+                    document.getElementById('code').value = ex.code;
+                    document.getElementById('level').value = ex.level;
+                    document.getElementById('title').value = ex.title;
+                    document.getElementById('description').value = ex.description;
+                    document.getElementById('websiteLink').value = ex.website_link || '';
+                    document.getElementById('skill').value = ex.skill || 'select';
+                    document.getElementById('topic').value = ex.topic || 'nhacsi';
+                    document.getElementById('hint').value = ex.hint || '';
+                    document.getElementById('solution').value = ex.solution || '';
+                    document.getElementById('explanation').value = ex.explanation || '';
+                    document.getElementById('defaultQuery').value = ex.default_query || '';
+                    
+                    // Load requirements
+                    const reqList = document.getElementById('requirementsList');
+                    reqList.innerHTML = '';
+                    if (ex.requirements && ex.requirements.length) {
+                        ex.requirements.forEach(req => {
+                            addRequirementWithValue(req);
+                        });
+                    } else {
+                        addRequirement();
+                    }
+                    
+                    document.getElementById('formTitle').innerHTML = '✏️ Chỉnh sửa bài tập';
+                    document.getElementById('submitBtn').innerHTML = '<span>💾</span> Cập nhật';
+                    
+                    switchTab('add');
+                }
+            } catch (error) {
+                showAlert('danger', 'Lỗi: ' + error);
+            }
+        }
+
+        // Show delete confirmation modal
+        function showDeleteModal(id, code) {
+            deleteId = id;
+            document.getElementById('deleteExerciseCode').textContent = code;
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+            deleteId = null;
+        }
+
+        // Confirm delete
+        async function confirmDelete() {
+            if (!deleteId) return;
+            
+            try {
+                const response = await fetch(`/api/exercises/${deleteId}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('success', 'Xóa bài tập thành công!');
+                    loadExercises(currentPage);
+                    closeModal();
+                } else {
+                    showAlert('danger', 'Lỗi: ' + data.error);
+                }
+            } catch (error) {
+                showAlert('danger', 'Lỗi kết nối: ' + error);
+            }
+        }
+
+        // Add requirement
+        function addRequirement() {
+            const list = document.getElementById('requirementsList');
+            const div = document.createElement('div');
+            div.className = 'requirement-item';
+            div.innerHTML = `
+                <input type="text" class="requirement-input" placeholder="Yêu cầu">
+                <button type="button" class="remove-req" onclick="removeRequirement(this)">✕</button>
+            `;
+            list.appendChild(div);
+        }
+
+        function addRequirementWithValue(value) {
+            const list = document.getElementById('requirementsList');
+            const div = document.createElement('div');
+            div.className = 'requirement-item';
+            div.innerHTML = `
+                <input type="text" class="requirement-input" value="${value}" placeholder="Yêu cầu">
+                <button type="button" class="remove-req" onclick="removeRequirement(this)">✕</button>
+            `;
+            list.appendChild(div);
+        }
+
+        function removeRequirement(btn) {
+            btn.parentElement.remove();
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('exerciseForm').reset();
+            document.getElementById('exerciseId').value = '';
+            document.getElementById('formTitle').innerHTML = '➕ Thêm bài tập mới';
+            document.getElementById('submitBtn').innerHTML = '<span>💾</span> Lưu bài tập';
+            
+            // Reset requirements
+            document.getElementById('requirementsList').innerHTML = `
+                <div class="requirement-item">
+                    <input type="text" class="requirement-input" placeholder="Yêu cầu 1">
+                    <button type="button" class="remove-req" onclick="removeRequirement(this)">✕</button>
+                </div>
+            `;
+        }
+
+        // Show alert
+        function showAlert(type, message) {
+            const alertDiv = document.getElementById('alertMessage');
+            alertDiv.innerHTML = `
+                <div class="alert alert-${type}">
+                    ${type === 'success' ? '✅' : '❌'}
+                    ${message}
+                </div>
+            `;
+            
+            setTimeout(() => {
+                alertDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        // Form submit
+        document.getElementById('exerciseForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Collect requirements
+            const requirements = [];
+            document.querySelectorAll('.requirement-input').forEach(input => {
+                if (input.value.trim()) {
+                    requirements.push(input.value.trim());
+                }
+            });
+            
+            const exerciseData = {
+                code: document.getElementById('code').value,
+                level: parseInt(document.getElementById('level').value),
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                requirements: requirements,
+                website_link: document.getElementById('websiteLink').value,
+                hint: document.getElementById('hint').value,
+                solution: document.getElementById('solution').value,
+                explanation: document.getElementById('explanation').value,
+                default_query: document.getElementById('defaultQuery').value,
+                skill: document.getElementById('skill').value,
+                topic: document.getElementById('topic').value
+            };
+            
+            const id = document.getElementById('exerciseId').value;
+            const url = id ? `/api/exercises/${id}` : '/api/exercises';
+            const method = id ? 'PUT' : 'POST';
+            
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(exerciseData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showAlert('success', id ? 'Cập nhật thành công!' : 'Thêm mới thành công!');
+                    resetForm();
+                    loadExercises();
+                    switchTab('list');
+                } else {
+                    showAlert('danger', 'Lỗi: ' + data.error);
+                }
+            } catch (error) {
+                showAlert('danger', 'Lỗi kết nối: ' + error);
+            }
+        });
+
+        // Export exercises
+        async function exportExercises() {
+            try {
+                const response = await fetch('/api/exercises');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const blob = new Blob([JSON.stringify(data.data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'exercises.json';
+                    a.click();
+                }
+            } catch (error) {
+                showAlert('danger', 'Lỗi: ' + error);
+            }
+        }
+
+        // Import exercises
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const exercises = JSON.parse(e.target.result);
+                    
+                    for (const ex of exercises) {
+                        await fetch('/api/exercises', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(ex)
+                        });
+                    }
+                    
+                    showAlert('success', 'Import thành công!');
+                    loadExercises();
+                } catch (error) {
+                    showAlert('danger', 'Lỗi: ' + error);
+                }
+            };
+            reader.readAsText(file);
+        });
+    </script>
+</body>
+</html>

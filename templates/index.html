@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyMusic - Ứng dụng nghe nhạc trực tuyến</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: #0a0a0f;
+            color: #ffffff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app {
+            display: flex;
+            height: 100vh;
+            background: radial-gradient(circle at 20% 30%, #1a1a2e 0%, #0a0a0f 80%);
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: rgba(10, 10, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: relative;
+            z-index: 10;
+            overflow-y: auto;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .user-profile:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(110, 69, 255, 0.3);
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        .user-info h4 {
+            font-size: 0.8rem;
+            color: #aaa;
+            font-weight: 400;
+        }
+
+        .user-info p {
+            font-weight: 600;
+            background: linear-gradient(135deg, #fff, #a0a0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-info small {
+            font-size: 0.65rem;
+            color: #6e45ff;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #8a8a9e;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(110, 69, 255, 0.15), rgba(255, 107, 107, 0.15));
+            color: #fff;
+            border-left: 3px solid #6e45ff;
+        }
+
+        .new-playlist-btn {
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: 600;
+            margin: 8px 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+
+        .category-section {
+            margin-top: 8px;
+        }
+
+        .category-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #5a5a72;
+            padding: 0 16px;
+            margin-bottom: 8px;
+        }
+
+        .category-item {
+            padding: 10px 16px;
+            color: #8a8a9e;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .category-item:hover,
+        .category-item.active {
+            background: rgba(255, 255, 255, 0.03);
+            color: #fff;
+        }
+
+        .system-footer {
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 16px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 0;
+            overflow-y: auto;
+            padding: 24px 32px;
+            position: relative;
+        }
+
+        .main-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .main-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .main-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 20px 14px 48px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 40px;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: rgba(110, 69, 255, 0.5);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #5a5a72;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .icon-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d0d0ff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(20, 20, 30, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(110, 69, 255, 0.3);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-info h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #a0a0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-info p {
+            color: #8a8a9e;
+            font-size: 0.9rem;
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, rgba(110, 69, 255, 0.2), rgba(255, 107, 107, 0.2), rgba(78, 205, 196, 0.2));
+            border-radius: 32px;
+            padding: 48px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(110, 69, 255, 0.3), transparent 60%);
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #fff, #d0d0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-description {
+            max-width: 600px;
+            color: #b0b0c0;
+            line-height: 1.6;
+            margin-bottom: 24px;
+            font-size: 1.1rem;
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border: none;
+            color: white;
+            padding: 16px 40px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 10px 20px rgba(110, 69, 255, 0.3);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(110, 69, 255, 0.4);
+        }
+
+        /* Section Header */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #a0a0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .view-all {
+            color: #6e45ff;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .view-all:hover {
+            gap: 10px;
+            color: #ff6b6b;
+        }
+
+        /* Featured Grid */
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .featured-card {
+            background: rgba(20, 20, 30, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .featured-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(110, 69, 255, 0.3);
+            background: rgba(30, 30, 40, 0.5);
+        }
+
+        .featured-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+        }
+
+        .featured-card h4 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .featured-composer {
+            color: #6e45ff;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .recording-count {
+            color: #8a8a9e;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Two Column Layout */
+        .two-column {
+            display: flex;
+            gap: 32px;
+            margin-bottom: 40px;
+        }
+
+        .left-column {
+            flex: 2;
+        }
+
+        .right-column {
+            flex: 1;
+        }
+
+        /* Composers Grid */
+        .composers-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .composer-card {
+            background: rgba(20, 20, 30, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .composer-card:hover {
+            background: rgba(30, 30, 40, 0.5);
+            border-color: rgba(110, 69, 255, 0.3);
+            transform: translateX(4px);
+        }
+
+        .composer-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .composer-info h4 {
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .composer-info p {
+            font-size: 0.8rem;
+            color: #8a8a9e;
+        }
+
+        /* Singers Grid */
+        .singers-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .singer-card {
+            background: rgba(20, 20, 30, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .singer-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(110, 69, 255, 0.3);
+            background: rgba(30, 30, 40, 0.5);
+        }
+
+        .singer-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .singer-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .singer-count {
+            font-size: 0.8rem;
+            color: #8a8a9e;
+            margin-bottom: 12px;
+        }
+
+        .follow-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 6px 16px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .follow-btn:hover {
+            background: rgba(110, 69, 255, 0.3);
+        }
+
+        /* Latest Section */
+        .latest-section {
+            background: rgba(20, 20, 30, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            border-radius: 24px;
+            padding: 20px;
+        }
+
+        .latest-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .latest-item:last-child {
+            border-bottom: none;
+        }
+
+        .latest-item:hover {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+        }
+
+        .latest-number {
+            width: 24px;
+            color: #6e45ff;
+            font-weight: 600;
+        }
+
+        .latest-info {
+            flex: 1;
+        }
+
+        .latest-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .latest-artist {
+            font-size: 0.8rem;
+            color: #8a8a9e;
+        }
+
+        .latest-date {
+            font-size: 0.8rem;
+            color: #6e45ff;
+            background: rgba(110, 69, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 20px;
+        }
+
+        .play-small {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(110, 69, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6e45ff;
+            cursor: pointer;
+        }
+
+        .play-small:hover {
+            background: rgba(110, 69, 255, 0.4);
+            transform: scale(1.1);
+        }
+
+        /* Bottom Player Bar */
+        .bottom-player {
+            position: fixed;
+            bottom: 0;
+            left: 280px;
+            right: 0;
+            height: 80px;
+            background: rgba(10, 10, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            z-index: 100;
+        }
+
+        .now-playing {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .now-playing-img {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .now-playing-info h5 {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .now-playing-info p {
+            font-size: 0.85rem;
+            color: #8a8a9e;
+        }
+
+        .bottom-controls {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .control-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d0d0ff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .control-btn.play {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            border: none;
+        }
+
+        .bottom-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: #8a8a9e;
+            cursor: pointer;
+        }
+
+        .bottom-actions span:hover {
+            color: #ff6b6b;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .two-column {
+                flex-direction: column;
+            }
+            .featured-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+            }
+            .sidebar .user-info h4,
+            .sidebar .user-info p,
+            .sidebar .user-info small,
+            .sidebar .nav-item span:not(:first-child),
+            .sidebar .category-item span:not(:first-child) {
+                display: none;
+            }
+            .main-content,
+            .bottom-player {
+                margin-left: 80px;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .featured-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="user-profile" onclick="window.location.href='{% if current_user and current_user.is_authenticated %}/profile{% else %}/login{% endif %}'">
+                <div class="avatar">
+                    {% if current_user and current_user.is_authenticated %}
+                        {{ (current_user.full_name or current_user.username)[0]|upper }}
+                    {% else %}
+                        🎵
+                    {% endif %}
+                </div>
+                <div class="user-info">
+                    {% if current_user and current_user.is_authenticated %}
+                        <h4>Xin chào,</h4>
+                        <p>{{ current_user.full_name or current_user.username }}</p>
+                        {% if current_user.is_admin() %}
+                            <small>👑 Quản trị viên</small>
+                        {% elif current_user.is_editor() %}
+                            <small>✏️ Biên tập viên</small>
+                        {% endif %}
+                    {% else %}
+                        <h4>Xin chào,</h4>
+                        <p>Khách</p>
+                        <small>Đăng nhập để trải nghiệm</small>
+                    {% endif %}
+                </div>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item active" onclick="window.location.href='/'">
+                    <span>🏠</span> Trang chủ
+                </li>
+                <li class="nav-item" onclick="window.location.href='/library'">
+                    <span>📚</span> Thư viện
+                </li>
+                <li class="nav-item" onclick="window.location.href='/trending'">
+                    <span>📈</span> Thịnh hành
+                </li>
+            </ul>
+
+            <button class="new-playlist-btn" onclick="window.location.href='/playlist/create'">
+                <span>➕</span> Tạo playlist mới
+            </button>
+
+            <div class="category-section">
+                <div class="category-title">DANH MỤC</div>
+                <div class="category-item" onclick="window.location.href='/bannhac'">
+                    <span>🎵</span> Bản nhạc
+                </div>
+                <div class="category-item" onclick="window.location.href='/nhacsi'">
+                    <span>🎼</span> Nhạc sĩ
+                </div>
+                <div class="category-item" onclick="window.location.href='/casi'">
+                    <span>🎤</span> Ca sĩ
+                </div>
+                <div class="category-item" onclick="window.location.href='/banthuam'">
+                    <span>🎧</span> Bản thu âm
+                </div>
+            </div>
+
+            <div class="system-footer">
+                <div class="category-item" onclick="window.location.href='/thuc-hanh-ai'">
+                    <span>🤖</span> Thực hành AI
+                </div>
+                
+                {% if current_user and current_user.is_authenticated %}
+                    {% if current_user.is_admin() %}
+                        <div class="category-item" onclick="window.location.href='/admin/users'">
+                            <span>⚙️</span> Quản trị hệ thống
+                        </div>
+                    {% endif %}
+                    <div class="category-item" onclick="window.location.href='auth/profile'">
+                        <span>👤</span> Thông tin cá nhân
+                    </div>
+                    <div class="category-item" onclick="window.location.href='auth/logout'" style="color: #ff6b6b;">
+                        <span>🚪</span> Đăng xuất
+                    </div>
+                {% else %}
+                    <div class="category-item" onclick="window.location.href='auth/login'">
+                        <span>🔑</span> Đăng nhập
+                    </div>
+                    <div class="category-item" onclick="window.location.href='auth/register'">
+                        <span>📝</span> Đăng ký
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" placeholder="Tìm kiếm bài hát, nghệ sĩ, nhạc sĩ...">
+                </div>
+                <div class="top-actions">
+                    <div class="icon-btn">🔔</div>
+                    <div class="icon-btn">💬</div>
+                    <div class="icon-btn">👤</div>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🎼</div>
+                    <div class="stat-info">
+                        <h3>{{ stats.nhacsi|default(0) }}</h3>
+                        <p>Nhạc sĩ</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎤</div>
+                    <div class="stat-info">
+                        <h3>{{ stats.casi|default(0) }}</h3>
+                        <p>Ca sĩ</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎵</div>
+                    <div class="stat-info">
+                        <h3>{{ stats.bannhac|default(0) }}</h3>
+                        <p>Bản nhạc</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎧</div>
+                    <div class="stat-info">
+                        <h3>{{ stats.banthuam|default(0) }}</h3>
+                        <p>Bản thu âm</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Banner -->
+            <div class="hero-banner">
+                <h1 class="hero-title">Trải nghiệm âm nhạc theo cách của bạn</h1>
+                <p class="hero-description">
+                    Khám phá cộng đồng sáng tạo nội dung số. Kết nối với hàng ngàn người dùng, 
+                    thỏa sức sáng tạo và khám phá âm nhạc không giới hạn.
+                </p>
+                <button class="generate-btn" onclick="window.location.href='/thuc-hanh-ai'">
+                    Khám phá ngay
+                </button>
+            </div>
+
+            <!-- Featured Songs -->
+            {% if featured_songs %}
+            <div class="section-header">
+                <h2 class="section-title">🎵 Bản nhạc nổi bật</h2>
+                <div class="view-all" onclick="window.location.href='/bannhac'">
+                    Xem tất cả <span>→</span>
+                </div>
+            </div>
+            <div class="featured-grid">
+                {% for song in featured_songs %}
+                <div class="featured-card" onclick="window.location.href='/bannhac/{{ song.idbannhac }}'">
+                    <div class="featured-icon">🎵</div>
+                    <h4>{{ song.tenbannhac }}</h4>
+                    <div class="featured-composer">{{ song.tennhacsi }}</div>
+                    <div class="recording-count">
+                        <span>🎤</span> {{ song.so_luong_banthuam }} bản thu
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Two Column Layout -->
+            <div class="two-column">
+                <div class="left-column">
+                    <!-- Composers Section -->
+                    {% if composers %}
+                    <div class="section-header">
+                        <h2 class="section-title">🎼 Nhạc sĩ tiêu biểu</h2>
+                        <div class="view-all" onclick="window.location.href='/nhacsi'">
+                            Xem tất cả <span>→</span>
+                        </div>
+                    </div>
+                    <div class="composers-grid">
+                        {% for composer in composers %}
+                        <div class="composer-card" onclick="window.location.href='/nhacsi/{{ composer.idnhacsi }}'">
+                            <div class="composer-avatar">
+                                {{ composer.tennhacsi[:2]|upper }}
+                            </div>
+                            <div class="composer-info">
+                                <h4>{{ composer.tennhacsi }}</h4>
+                                <p>{{ composer.so_luong_bai_hat }} bài hát</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Latest Recordings -->
+                    {% if latest_recordings %}
+                    <div class="section-header">
+                        <h2 class="section-title">🆕 Bản thu mới nhất</h2>
+                        <div class="view-all" onclick="window.location.href='/banthuam'">
+                            Xem tất cả <span>→</span>
+                        </div>
+                    </div>
+                    <div class="latest-section">
+                        {% for recording in latest_recordings %}
+                        <div class="latest-item" onclick="window.location.href='/banthuam/detail/{{ recording.idbanthuam }}'">
+                            <span class="latest-number">{{ loop.index }}</span>
+                            <div class="latest-info">
+                                <div class="latest-title">{{ recording.tenbannhac }}</div>
+                                <div class="latest-artist">{{ recording.tencasi }}</div>
+                            </div>
+                            <span class="latest-date">{{ recording.created_at|default('') }}</span>
+                            <div class="play-small">▶️</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="right-column">
+                    <!-- Singers Section -->
+                    {% if singers %}
+                    <div class="section-header">
+                        <h2 class="section-title">🎤 Ca sĩ nổi bật</h2>
+                        <div class="view-all" onclick="window.location.href='/casi'">
+                            Xem tất cả <span>→</span>
+                        </div>
+                    </div>
+                    <div class="singers-grid">
+                        {% for singer in singers %}
+                        <div class="singer-card" onclick="window.location.href='/casi/{{ singer.idcasi }}'">
+                            <div class="singer-avatar">
+                                {{ singer.tencasi[:2]|upper }}
+                            </div>
+                            <div class="singer-name">{{ singer.tencasi }}</div>
+                            <div class="singer-count">{{ singer.so_luong_banthuam }} bản thu</div>
+                            <button class="follow-btn" onclick="event.stopPropagation();">Theo dõi</button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Trending Section -->
+                    <div class="latest-section" style="margin-top: 30px;">
+                        <h3 style="margin-bottom: 20px; color: #fff;">📈 Đang thịnh hành</h3>
+                        {% if featured_songs[:3] %}
+                            {% for song in featured_songs[:3] %}
+                            <div class="latest-item" style="cursor: pointer;" onclick="window.location.href='/bannhac/{{ song.idbannhac }}'">
+                                <div class="latest-info">
+                                    <div class="latest-title">{{ song.tenbannhac }}</div>
+                                    <div class="latest-artist">{{ song.tennhacsi }}</div>
+                                </div>
+                                <div class="play-small">▶️</div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div style="color: #8a8a9e; text-align: center; padding: 20px;">
+                                Chưa có dữ liệu
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Player Bar -->
+        <div class="bottom-player">
+            <div class="now-playing">
+                <div class="now-playing-img">🎵</div>
+                <div class="now-playing-info">
+                    <h5>Chào mừng bạn</h5>
+                    <p>Chọn bài hát để phát</p>
+                </div>
+            </div>
+            <div class="bottom-controls">
+                <div class="control-btn">⏮️</div>
+                <div class="control-btn play">▶️</div>
+                <div class="control-btn">⏭️</div>
+            </div>
+            <div class="bottom-actions">
+                <span>❤️</span>
+                <span>📤</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Search functionality
+        document.querySelector('.search-input')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value.trim();
+                if (query) {
+                    window.location.href = `/search?q=${encodeURIComponent(query)}`;
+                }
+            }
+        });
+
+        // Follow button handler
+        document.querySelectorAll('.follow-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isFollowing = this.textContent === 'Đang theo dõi';
+                this.textContent = isFollowing ? 'Theo dõi' : 'Đang theo dõi';
+                this.style.background = isFollowing ? 'rgba(255,255,255,0.05)' : 'rgba(110,69,255,0.3)';
+            });
+        });
+    </script>
+</body>
+</html>

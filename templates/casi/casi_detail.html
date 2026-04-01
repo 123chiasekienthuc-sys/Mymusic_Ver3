@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}{{ casi.tencasi }} - MyMusic{% endblock %}
+
+{% block content %}
+<div class="back-btn" onclick="window.location.href='/casi'">
+    <span>←</span> Quay lại danh sách
+</div>
+
+<div class="artist-header">
+    <div class="artist-avatar-large">
+        {% if casi.anhdaidien %}
+            <img src="{{ url_for('static', filename='images/singers/' + casi.anhdaidien) }}" style="width:100%;height:100%;object-fit:cover">
+        {% else %}
+            {{ casi.tencasi[:2]|upper }}
+        {% endif %}
+    </div>
+    <div class="artist-info">
+        <h1>{{ casi.tencasi }}</h1>
+        <div class="artist-meta">
+            {% if casi.ngaysinh %}<div>📅 Sinh: {{ casi.ngaysinh }}</div>{% endif %}
+            <div>📅 Tham gia: {{ casi.ngay_them }}</div>
+        </div>
+        {% if casi.sunghiep %}<div class="artist-bio">{{ casi.sunghiep }}</div>{% endif %}
+        <div class="action-buttons">
+            <button class="edit-btn" onclick="window.location.href='/casi/edit/{{ casi.idcasi }}'">✏️ Sửa</button>
+            <button class="delete-btn" onclick="deleteSinger({{ casi.idcasi }})">🗑️ Xóa</button>
+        </div>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card"><div class="stat-value">{{ banthuam|length }}</div><div class="stat-label">Bản thu âm</div></div>
+    <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Người theo dõi</div></div>
+</div>
+
+<h2 class="section-title">🎧 Các bản thu âm</h2>
+<div class="recordings-grid">
+    {% for rec in banthuam %}
+    <div class="recording-card" onclick="window.location.href='/banthuam/detail/{{ rec.idbanthuam }}'">
+        <div class="recording-header">
+            <div class="recording-icon">🎵</div>
+            <div><h3>{{ rec.tenbannhac }}</h3><div class="recording-singer">{{ rec.tennhacsi }}</div></div>
+        </div>
+        <div class="recording-details">📅 {{ rec.ngay_them }}</div>
+        <button class="play-btn" onclick="event.stopPropagation()">▶️ Nghe</button>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function deleteSinger(id) {
+    if(confirm('Xóa ca sĩ này?')) {
+        fetch(`/api/casi/${id}`, {method:'DELETE'})
+        .then(r=>r.json())
+        .then(d=>{if(d.success) window.location.href='/casi'; else alert(d.message)});
+    }
+}
+</script>
+{% endblock %}

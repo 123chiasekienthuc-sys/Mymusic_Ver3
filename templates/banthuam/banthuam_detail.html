@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}{{ recording.tenbannhac }} - {{ recording.tencasi }}{% endblock %}
+
+{% block content %}
+<div class="back-btn" onclick="window.location.href='/banthuam'">
+    <span>←</span> Quay lại danh sách
+</div>
+
+<div class="song-header">
+    <div class="song-icon-large">🎤</div>
+    <div class="song-info">
+        <h1>{{ recording.tenbannhac }}</h1>
+        <div class="song-meta">
+            <div>🎤 Ca sĩ: <a href="/casi/{{ recording.idcasi }}">{{ recording.tencasi }}</a></div>
+            <div>🎼 Nhạc sĩ: <a href="/nhacsi/{{ recording.idnhacsi }}">{{ recording.tennhacsi }}</a></div>
+            {% if recording.ngaythu %}<div>📅 Ngày thu: {{ recording.ngaythu }}</div>{% endif %}
+            {% if recording.thoiluong %}<div>⏱️ Thời lượng: {{ recording.thoiluong }}</div>{% endif %}
+        </div>
+        <div class="action-buttons">
+            <button class="play-btn" onclick="alert('Đang phát...')">▶️ Phát</button>
+            <button class="edit-btn" onclick="window.location.href='/banthuam/edit/{{ recording.idbanthuam }}'">✏️ Sửa</button>
+            <button class="delete-btn" onclick="deleteRecording({{ recording.idbanthuam }})">🗑️ Xóa</button>
+        </div>
+    </div>
+</div>
+
+{% if recording.lyrics %}
+<div class="lyrics-section">
+    <h2 class="section-title">📝 Lời bài hát</h2>
+    <div class="lyrics-content">{{ recording.lyrics|replace('\n', '<br>')|safe }}</div>
+</div>
+{% endif %}
+
+{% if related_recordings %}
+<h2 class="section-title">🎧 Cùng bài hát</h2>
+<div class="related-grid">
+    {% for related in related_recordings %}
+    <div class="related-card" onclick="window.location.href='/banthuam/detail/{{ related.idbanthuam }}'">
+        <h4>{{ related.tencasi }}</h4>
+        <p>{{ related.ngaythu }}</p>
+        <div class="related-meta">⏱️ {{ related.thoiluong }}</div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<script>
+function deleteRecording(id) {
+    if(confirm('Xóa bản thu âm này?')) {
+        fetch(`/api/banthuam/${id}`, {method:'DELETE'})
+        .then(r=>r.json())
+        .then(d=>{if(d.success) window.location.href='/banthuam'; else alert(d.message)});
+    }
+}
+</script>
+{% endblock %}

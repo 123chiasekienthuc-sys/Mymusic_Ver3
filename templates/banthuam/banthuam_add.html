@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Thêm bản thu âm - MyMusic{% endblock %}
+
+{% block content %}
+<div class="back-btn" onclick="window.location.href='/banthuam'">
+    <span>←</span> Quay lại danh sách
+</div>
+
+<div class="form-container">
+    <h1 class="form-title">➕ Thêm bản thu âm mới</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{% if category == 'success' %}✅{% elif category == 'danger' %}❌{% else %}⚠️{% endif %} {{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="/banthuam/add" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Bài hát <span style="color:#ff6b6b;">*</span></label>
+                <select name="idbannhac" class="form-control" required>
+                    <option value="">-- Chọn bài hát --</option>
+                    {% for song in songs %}
+                    <option value="{{ song.idbannhac }}">{{ song.tenbannhac }} - {{ song.tennhacsi }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Ca sĩ <span style="color:#ff6b6b;">*</span></label>
+                <select name="idcasi" class="form-control" required>
+                    <option value="">-- Chọn ca sĩ --</option>
+                    {% for artist in artists %}
+                    <option value="{{ artist.idcasi }}">{{ artist.tencasi }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Ngày thu âm</label>
+                <input type="date" name="ngaythuam" class="form-control">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Thời lượng</label>
+                <input type="time" name="thoiluong" class="form-control" step="1">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">File âm thanh <span style="color:#ff6b6b;">*</span></label>
+            <div class="file-input">
+                <input type="file" name="audio_file" accept="audio/*" required onchange="updateFileName(this)">
+                <div class="file-label">
+                    <span>🎵</span>
+                    <span>Chọn file MP3, WAV, AAC...</span>
+                </div>
+            </div>
+            <div id="fileName" class="file-name"></div>
+            <small class="form-hint">Kích thước tối đa: 20MB</small>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Lời bài hát</label>
+            <textarea name="lyrics" class="form-control" rows="5" placeholder="Nhập lời bài hát..."></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Ghi chú</label>
+            <textarea name="ghichu" class="form-control" rows="3" placeholder="Nhập ghi chú (nếu có)..."></textarea>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">💾 Lưu lại</button>
+            <button type="button" class="btn-cancel" onclick="window.location.href='/banthuam'">❌ Hủy</button>
+        </div>
+    </form>
+</div>
+
+<script>
+function updateFileName(input) {
+    const fileName = document.getElementById('fileName');
+    if (input.files && input.files[0]) {
+        fileName.textContent = '📁 Đã chọn: ' + input.files[0].name + ' (' + (input.files[0].size / 1024 / 1024).toFixed(2) + ' MB)';
+    } else {
+        fileName.textContent = '';
+    }
+}
+
+// Preselect from URL
+(function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const bannhac = urlParams.get('bannhac');
+    const casi = urlParams.get('casi');
+    if (bannhac) document.querySelector('select[name="idbannhac"]').value = bannhac;
+    if (casi) document.querySelector('select[name="idcasi"]').value = casi;
+})();
+</script>
+{% endblock %}

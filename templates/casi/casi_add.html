@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Thêm ca sĩ - MyMusic{% endblock %}
+
+{% block content %}
+<div class="back-btn" onclick="window.location.href='/casi'">
+    <span>←</span> Quay lại danh sách
+</div>
+
+<div class="form-container">
+    <h1 class="form-title">➕ Thêm ca sĩ mới</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{% if category == 'success' %}✅{% elif category == 'danger' %}❌{% else %}⚠️{% endif %} {{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="/casi/add" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        
+        <div class="form-group">
+            <label class="form-label">Tên ca sĩ <span style="color:#ff6b6b;">*</span></label>
+            <input type="text" name="tencasi" class="form-control" required placeholder="Nhập tên ca sĩ">
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Ngày sinh</label>
+            <input type="date" name="ngaysinh" class="form-control">
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Ảnh đại diện</label>
+            <div class="file-input">
+                <input type="file" name="anhdaidien" accept="image/*" onchange="previewFile(this)">
+                <div class="file-label">
+                    <span>📸</span>
+                    <span>Chọn ảnh</span>
+                </div>
+            </div>
+            <img id="preview" class="preview-image" src="#" alt="Preview">
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Sự nghiệp / Tiểu sử</label>
+            <textarea name="sunghiep" class="form-control" rows="5" placeholder="Nhập thông tin sự nghiệp ca sĩ..."></textarea>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-submit">💾 Lưu lại</button>
+            <button type="button" class="btn-cancel" onclick="window.location.href='/casi'">❌ Hủy</button>
+        </div>
+    </form>
+</div>
+
+<script>
+function previewFile(input) {
+    const preview = document.getElementById('preview');
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        }
+        reader.readAsDataURL(file);
+    } else {
+        preview.src = '#';
+        preview.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Quản trị hệ thống{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">⚙️ Quản trị hệ thống</h1>
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid-admin">
+    <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-info">
+            <h3>{{ stats.users or 0 }}</h3>
+            <p>Người dùng</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🎼</div>
+        <div class="stat-info">
+            <h3>{{ stats.nhacsi or 0 }}</h3>
+            <p>Nhạc sĩ</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🎤</div>
+        <div class="stat-info">
+            <h3>{{ stats.casi or 0 }}</h3>
+            <p>Ca sĩ</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🎵</div>
+        <div class="stat-info">
+            <h3>{{ stats.bannhac or 0 }}</h3>
+            <p>Bản nhạc</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🎧</div>
+        <div class="stat-info">
+            <h3>{{ stats.banthuam or 0 }}</h3>
+            <p>Bản thu âm</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📚</div>
+        <div class="stat-info">
+            <h3>{{ exercise_stats.total or 0 }}</h3>
+            <p>Bài tập</p>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Menu -->
+<div class="admin-menu">
+    <h2 class="section-title">📋 Quản lý</h2>
+    <div class="menu-grid">
+        <a href="/admin/users" class="menu-card">
+            <div class="menu-icon">👥</div>
+            <div class="menu-title">Quản lý người dùng</div>
+            <div class="menu-desc">Xem, thêm, sửa, xóa người dùng</div>
+        </a>
+        <a href="/admin/activity" class="menu-card">
+            <div class="menu-icon">📊</div>
+            <div class="menu-title">Hoạt động</div>
+            <div class="menu-desc">Xem lịch sử hoạt động</div>
+        </a>
+        <a href="/admin/exercises" class="menu-card">
+            <div class="menu-icon">📝</div>
+            <div class="menu-title">Quản lý bài tập</div>
+            <div class="menu-desc">Thêm, sửa, xóa bài tập SQL</div>
+        </a>
+        <a href="/admin/exercise-results" class="menu-card">
+            <div class="menu-icon">📈</div>
+            <div class="menu-title">Kết quả thực hành</div>
+            <div class="menu-desc">Xem kết quả của học sinh</div>
+        </a>
+    </div>
+</div>
+
+<style>
+.stats-grid-admin {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: rgba(20, 20, 30, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(110, 69, 255, 0.3);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.stat-info h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff, #a0a0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.stat-info p {
+    color: #8a8a9e;
+    font-size: 0.9rem;
+}
+
+.admin-menu {
+    background: rgba(20, 20, 30, 0.4);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 30px;
+    padding: 30px;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.menu-card {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 24px;
+    text-decoration: none;
+    color: white;
+    transition: all 0.3s;
+    display: block;
+}
+
+.menu-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(110, 69, 255, 0.3);
+    background: rgba(30, 30, 40, 0.5);
+}
+
+.menu-icon {
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+}
+
+.menu-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.menu-desc {
+    font-size: 0.85rem;
+    color: #8a8a9e;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff, #a0a0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+</style>
+{% endblock %}

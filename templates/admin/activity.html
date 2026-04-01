@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoạt động người dùng - MyMusic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: #0a0a0f;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            background: rgba(20, 20, 30, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 20px 30px;
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #a0a0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-back {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            color: #8a8a9e;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .activity-table-container {
+            background: rgba(20, 20, 30, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .activity-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .activity-table th {
+            text-align: left;
+            padding: 15px;
+            color: #d0d0ff;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .activity-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .activity-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(20, 20, 30, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8a8a9e;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .page-btn.active {
+            background: linear-gradient(135deg, #6e45ff, #ff6b6b);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <div class="header-title">
+                <h1>📋 Hoạt động người dùng</h1>
+            </div>
+            <a href="/" class="btn-back">← Quay lại trang chủ</a>
+        </div>
+
+        <div class="activity-table-container">
+            <table class="activity-table">
+                <thead>
+                    <tr>
+                        <th>Thời gian</th>
+                        <th>Người dùng</th>
+                        <th>Hành động</th>
+                        <th>Chi tiết</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activity in activities %}
+                    <tr>
+                        <td>{{ activity.created_at.strftime('%d/%m/%Y %H:%M:%S') if activity.created_at else '-' }}</td>
+                        <td>
+                            <strong>{{ activity.username or 'N/A' }}</strong><br>
+                            <small style="color: #8a8a9e;">{{ activity.full_name or '' }}</small>
+                        </td>
+                        <td>{{ activity.action }}</td>
+                        <td>{{ activity.details or '-' }}</td>
+                        <td>{{ activity.ip_address or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if total_pages > 1 %}
+        <div class="pagination">
+            <div class="page-btn" onclick="changePage({{ page-1 }})" {% if page <= 1 %}style="opacity:0.3;pointer-events:none;"{% endif %}>←</div>
+            {% for p in range(1, total_pages + 1) %}
+                <div class="page-btn {% if p == page %}active{% endif %}" onclick="changePage({{ p }})">{{ p }}</div>
+            {% endfor %}
+            <div class="page-btn" onclick="changePage({{ page+1 }})" {% if page >= total_pages %}style="opacity:0.3;pointer-events:none;"{% endif %}>→</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function changePage(page) {
+            window.location.href = `/admin/activity?page=${page}`;
+        }
+    </script>
+</body>
+</html>

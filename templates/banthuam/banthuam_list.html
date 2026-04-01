@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Danh sách bản thu âm - MyMusic{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">🎧 Danh sách bản thu âm</h1>
+    <a href="/banthuam/add" class="add-btn"><span>➕</span> Thêm bản thu</a>
+</div>
+
+<div class="filter-bar">
+    <div class="filter-tabs">
+        <div class="filter-tab active" data-filter="all">Tất cả</div>
+        <div class="filter-tab" data-filter="newest">Mới nhất</div>
+    </div>
+    <select class="filter-select" id="artistFilter">
+        <option value="">Tất cả ca sĩ</option>
+        {% for artist in artists %}
+        <option value="{{ artist.idcasi }}" {% if artist_id == artist.idcasi %}selected{% endif %}>{{ artist.tencasi }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+<div class="recordings-grid">
+    {% for rec in banthuam_list %}
+    <div class="recording-card" onclick="window.location.href='/banthuam/detail/{{ rec.idbanthuam }}'">
+        <div class="recording-header">
+            <div class="recording-icon">🎤</div>
+            <div><h3>{{ rec.tenbannhac }}</h3><div class="recording-singer">{{ rec.tencasi }}</div></div>
+        </div>
+        <div class="recording-details">
+            <span>🎼 {{ rec.tennhacsi }}</span>
+            <span>📅 {{ rec.ngay_them }}</span>
+        </div>
+        <button class="play-btn" onclick="event.stopPropagation()">▶️ Nghe</button>
+    </div>
+    {% endfor %}
+</div>
+
+{% if total_pages > 1 %}
+<div class="pagination">
+    <div class="page-btn" onclick="changePage({{ page-1 }})" {% if page <= 1 %}style="opacity:0.3"{% endif %}>←</div>
+    {% for p in range(1, total_pages + 1) %}
+    <div class="page-btn {% if p == page %}active{% endif %}" onclick="changePage({{ p }})">{{ p }}</div>
+    {% endfor %}
+    <div class="page-btn" onclick="changePage({{ page+1 }})" {% if page >= total_pages %}style="opacity:0.3"{% endif %}>→</div>
+</div>
+{% endif %}
+
+<script>
+function changePage(page) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', page);
+    window.location.href = url.toString();
+}
+</script>
+{% endblock %}

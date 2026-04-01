@@ -1,0 +1,111 @@
+<!-- templates/sidebar.html -->
+<div class="sidebar">
+    <div class="user-profile" onclick="window.location.href='{% if current_user.is_authenticated %}/auth/profile{% else %}/auth/login{% endif %}'">
+        <div class="avatar">
+            {% if current_user.is_authenticated %}
+                {{ (current_user.full_name or current_user.username)[0]|upper }}
+            {% else %}
+                🎵
+            {% endif %}
+        </div>
+        <div class="user-info">
+            {% if current_user.is_authenticated %}
+                <h4>Xin chào,</h4>
+                <p>{{ current_user.full_name or current_user.username }}</p>
+                {% if current_user.is_admin() %}
+                    <small>👑 Quản trị viên</small>
+                {% elif current_user.is_editor() %}
+                    <small>✏️ Biên tập viên</small>
+                {% endif %}
+            {% else %}
+                <h4>Xin chào,</h4>
+                <p>Khách</p>
+                <small>Đăng nhập để trải nghiệm</small>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Menu chính -->
+    <ul class="nav-menu">
+        <li class="nav-item {% if request.endpoint == 'main.index' %}active{% endif %}" onclick="window.location.href='/'">
+            <span>🏠</span> Trang chủ
+        </li>
+        <li class="nav-item" onclick="window.location.href='/library'">
+            <span>📚</span> Thư viện
+        </li>
+        <li class="nav-item" onclick="window.location.href='/trending'">
+            <span>📈</span> Thịnh hành
+        </li>
+    </ul>
+
+    <!-- Nút tạo playlist -->
+    <button class="new-playlist-btn" onclick="window.location.href='/playlist/create'">
+        <span>➕</span> Tạo playlist mới
+    </button>
+
+    <!-- DANH MỤC CHÍNH -->
+    <div class="category-section">
+        <div class="category-title">🎵 DANH MỤC ÂM NHẠC</div>
+        
+        <!-- Bản nhạc -->
+        <div class="category-item {% if request.endpoint == 'song.list_songs' %}active{% endif %}" onclick="window.location.href='/bannhac'">
+            <span>🎵</span> Bản nhạc
+        </div>
+        
+        <!-- Nhạc sĩ -->
+        <div class="category-item {% if request.endpoint == 'composer.list_composers' %}active{% endif %}" onclick="window.location.href='/nhacsi'">
+            <span>🎼</span> Nhạc sĩ
+        </div>
+        
+        <!-- Ca sĩ -->
+        <div class="category-item {% if request.endpoint == 'singer.list_singers' %}active{% endif %}" onclick="window.location.href='/casi'">
+            <span>🎤</span> Ca sĩ
+        </div>
+        
+        <!-- Bản thu âm -->
+        <div class="category-item {% if request.endpoint == 'recording.list_recordings' %}active{% endif %}" onclick="window.location.href='/banthuam'">
+            <span>🎧</span> Bản thu âm
+        </div>
+    </div>
+
+    <!-- HỌC TẬP -->
+    <div class="category-section">
+        <div class="category-title">📚 HỌC TẬP</div>
+        
+        <!-- Thực hành AI -->
+        <div class="category-item {% if request.endpoint == 'ai.thuc_hanh_ai' %}active{% endif %}" onclick="window.location.href='/thuc-hanh-ai'">
+            <span>🤖</span> Thực hành SQL với AI
+        </div>
+        
+        <!-- Tiến độ học tập -->
+        <div class="category-item" onclick="window.location.href='/dashboard/progress'">
+            <span>📊</span> Tiến độ học tập
+        </div>
+    </div>
+
+    <!-- HỆ THỐNG -->
+    <div class="system-footer">
+        <div class="category-title">⚙️ HỆ THỐNG</div>
+        
+        {% if current_user.is_authenticated %}
+            {% if current_user.is_admin() %}
+                <div class="category-item" onclick="window.location.href='/admin/dashboard'">
+                    <span>🛡️</span> Quản trị hệ thống
+                </div>
+            {% endif %}
+            <div class="category-item" onclick="window.location.href='/auth/profile'">
+                <span>👤</span> Thông tin cá nhân
+            </div>
+            <div class="category-item" onclick="window.location.href='/auth/logout'" style="color: #ff6b6b;">
+                <span>🚪</span> Đăng xuất
+            </div>
+        {% else %}
+            <div class="category-item" onclick="window.location.href='/auth/login'">
+                <span>🔑</span> Đăng nhập
+            </div>
+            <div class="category-item" onclick="window.location.href='/auth/register'">
+                <span>📝</span> Đăng ký
+            </div>
+        {% endif %}
+    </div>
+</div>

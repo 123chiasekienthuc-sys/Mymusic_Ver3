@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}{{ bannhac.tenbannhac }} - MyMusic{% endblock %}
+
+{% block content %}
+<div class="back-btn" onclick="window.location.href='/bannhac'">
+    <span>←</span> Quay lại danh sách
+</div>
+
+<div class="song-header">
+    <div class="song-icon-large">🎵</div>
+    <div class="song-info">
+        <h1>{{ bannhac.tenbannhac }}</h1>
+        <div class="song-meta">
+            <div>🎼 Nhạc sĩ: <a href="/nhacsi/{{ bannhac.idnhacsi }}">{{ bannhac.tennhacsi }}</a></div>
+            {% if bannhac.theloai %}<div>🏷️ Thể loại: {{ bannhac.theloai }}</div>{% endif %}
+            <div>📅 Ngày thêm: {{ bannhac.ngay_them }}</div>
+        </div>
+        <div class="action-buttons">
+            <button class="edit-btn" onclick="window.location.href='/bannhac/edit/{{ bannhac.idbannhac }}'">✏️ Sửa</button>
+            <button class="delete-btn" onclick="deleteSong({{ bannhac.idbannhac }})">🗑️ Xóa</button>
+            <button class="add-recording-btn" onclick="window.location.href='/banthuam/add?bannhac={{ bannhac.idbannhac }}'">➕ Thêm bản thu</button>
+        </div>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card"><div class="stat-value">{{ banthuam|length }}</div><div class="stat-label">Bản thu âm</div></div>
+    <div class="stat-card"><div class="stat-value">{{ singers_count or 0 }}</div><div class="stat-label">Ca sĩ thể hiện</div></div>
+    <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">Lượt nghe</div></div>
+</div>
+
+<h2 class="section-title">🎧 Các bản thu âm</h2>
+<div class="recordings-grid">
+    {% for recording in banthuam %}
+    <div class="recording-card" onclick="window.location.href='/banthuam/detail/{{ recording.idbanthuam }}'">
+        <div class="recording-header">
+            <div class="recording-icon">🎤</div>
+            <div><h3>{{ recording.tencasi }}</h3></div>
+        </div>
+        <div class="recording-details">
+            <span>📅 {{ recording.ngay_them }}</span>
+            {% if recording.thoiluong %}<span>⏱️ {{ recording.thoiluong }}</span>{% endif %}
+        </div>
+        <button class="play-btn" onclick="event.stopPropagation(); alert('Đang phát...')">▶️ Phát</button>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function deleteSong(id) {
+    if(confirm('Xóa bản nhạc này?')) {
+        fetch(`/api/bannhac/${id}`, {method:'DELETE'})
+        .then(r=>r.json())
+        .then(d=>{if(d.success) window.location.href='/bannhac'; else alert(d.message)});
+    }
+}
+</script>
+{% endblock %}

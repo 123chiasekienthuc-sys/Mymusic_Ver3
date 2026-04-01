@@ -1,0 +1,31 @@
+<!-- templates/sidebar.html - Thêm vào system-footer -->
+<div class="system-footer">
+    <div class="category-item" onclick="window.location.href='/thuc-hanh-ai'">
+        <span>🤖</span> Thực hành AI
+    </div>
+    <!-- templates/sidebar.html - Thêm vào system-footer -->
+    <div class="category-item" onclick="window.location.href='/dashboard/progress'">
+         <span>📊</span> Tiến độ học tập
+    </div>
+    
+    {% if current_user.is_authenticated %}
+        {% if current_user.is_admin() %}
+            <div class="category-item" onclick="window.location.href='/admin/dashboard'">
+                <span>⚙️</span> Quản trị hệ thống
+            </div>
+        {% endif %}
+        <div class="category-item" onclick="window.location.href='/auth/profile'">
+            <span>👤</span> Thông tin cá nhân
+        </div>
+        <div class="category-item" onclick="window.location.href='/auth/logout'" style="color: #ff6b6b;">
+            <span>🚪</span> Đăng xuất
+        </div>
+    {% else %}
+        <div class="category-item" onclick="window.location.href='/auth/login'">
+            <span>🔑</span> Đăng nhập
+        </div>
+        <div class="category-item" onclick="window.location.href='/auth/register'">
+            <span>📝</span> Đăng ký
+        </div>
+    {% endif %}
+</div>
