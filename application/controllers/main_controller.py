@@ -246,3 +246,9 @@ def api_banthuam_noibat():
 def student_progress():
     """Trang theo dõi tiến độ học tập"""
     return render_template('dashboard/student_progress.html')
+
+
+@main_bp.route('/about')
+def about():
+    """Trang giới thiệu sáng kiến"""
+    return render_template('about.html')
