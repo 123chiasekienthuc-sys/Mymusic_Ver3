@@ -8,6 +8,7 @@ from application.controllers.recording_controller import recording_bp
 from application.controllers.exercise_controller import exercise_bp
 from application.controllers.ai_controller import ai_bp
 from application.controllers.admin_controller import admin_bp
+from application.controllers.progress_controller import progress_bp
 
 __all__ = [
     'main_bp', 
@@ -18,5 +19,6 @@ __all__ = [
     'recording_bp', 
     'exercise_bp', 
     'ai_bp', 
-    'admin_bp'
+    'admin_bp',
+    'progress_bp'
 ]

@@ -6,11 +6,12 @@ load_dotenv()
 
 # Cấu hình database
 DB_CONFIG = {
-    'host': os.getenv('MYSQLHOST', 'mysql.railway.internal'),
+
+    'host': os.getenv('MYSQLHOST', 'interchange.proxy.rlwy.net'),
     'user': os.getenv('MYSQLUSER', 'root'),
     'password': os.getenv('MYSQLPASSWORD', 'FJLMQpLSJZgzdwGTIOloLGzBCOypNCqz'),
     'database': os.getenv('MYSQLDATABASE', 'railway'),
-    'port': int(os.getenv('MYSQLPORT', 3306)),
+    'port': int(os.getenv('MYSQLPORT', 58957)),
     'charset': 'utf8mb4',
     'use_unicode': True,
     'connect_timeout': 10,

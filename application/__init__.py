@@ -51,7 +51,7 @@ def register_blueprints(app):
     """Đăng ký tất cả blueprints"""
     from application.controllers import (
         main_bp, auth_bp, composer_bp, singer_bp,
-        song_bp, recording_bp, exercise_bp, ai_bp, admin_bp
+        song_bp, recording_bp, exercise_bp, ai_bp, admin_bp, progress_bp
     )
     
     app.register_blueprint(main_bp)
@@ -64,7 +64,7 @@ def register_blueprints(app):
     app.register_blueprint(exercise_bp, url_prefix='/api')
     app.register_blueprint(ai_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
-
+    app.register_blueprint(progress_bp, url_prefix='/api/progress')
 
 def register_middleware(app):
     """Đăng ký middleware"""

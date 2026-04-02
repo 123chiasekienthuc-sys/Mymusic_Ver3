@@ -1,11 +1,11 @@
 # application/controllers/ai_controller.py
 import os
 import logging
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for
 from application.services.database_service import DatabaseService
 from application.extensions import csrf
 
-ai_bp = Blueprint('ai', __name__)
+ai_bp = Blueprint('ai', __name__)  # Dòng này PHẢI CÓ ở đầu file
 db = DatabaseService()
 logger = logging.getLogger(__name__)
 
@@ -22,6 +22,13 @@ except ImportError:
 def thuc_hanh_ai():
     """Trang thực hành SQL với AI"""
     return render_template('thuc_hanh_ai.html')
+
+
+# Thêm route redirect để hỗ trợ cả hai URL
+@ai_bp.route('/ai/thuc-hanh-ai', methods=['GET'])
+def thuc_hanh_ai_redirect():
+    """Redirect từ /ai/thuc-hanh-ai sang /thuc-hanh-ai"""
+    return redirect(url_for('ai.thuc_hanh_ai', **request.args))
 
 
 @ai_bp.route('/chat', methods=['POST'])

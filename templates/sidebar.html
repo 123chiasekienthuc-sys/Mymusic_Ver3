@@ -96,9 +96,12 @@
             <div class="category-item" onclick="window.location.href='/auth/profile'">
                 <span>👤</span> Thông tin cá nhân
             </div>
-            <div class="category-item" onclick="window.location.href='/auth/logout'" style="color: #ff6b6b;">
-                <span>🚪</span> Đăng xuất
-            </div>
+            <form action="{{ url_for('auth.logout') }}" method="POST" style="display: inline; width: 100%;">
+				<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+				<button type="submit" class="category-item" style="background: none; border: none; width: 100%; text-align: left; color: #ff6b6b; cursor: pointer; padding: 10px 16px;">
+				<span>🚪</span> Đăng xuất
+				</button>
+			</form>
         {% else %}
             <div class="category-item" onclick="window.location.href='/auth/login'">
                 <span>🔑</span> Đăng nhập
@@ -108,4 +111,19 @@
             </div>
         {% endif %}
     </div>
+	<!-- THÔNG TIN TÁC GIẢ -->
+    <div class="author-info" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">
+        <div style="font-size: 0.7rem; color: #5a5a72;">🏆 Sáng kiến năm học 2025-2026</div>
+        <div style="font-size: 0.7rem; color: #6e45ff; margin-top: 5px;">
+            <span>© An Thị Hồng</span>
+        </div>
+        <div style="font-size: 0.65rem; color: #5a5a72; margin-top: 5px;">
+            THPT Hiệp Hòa số 1 - Bắc Ninh
+        </div>
+        <div style="margin-top: 8px;">
+            <a href="/about" style="font-size: 0.65rem; color: #6e45ff; text-decoration: none;">📖 Giới thiệu sáng kiến</a>
+        </div>
+        
+    </div>
+	
 </div>
